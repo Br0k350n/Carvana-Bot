@@ -14,9 +14,12 @@ module.exports = {
                     .setRequired(true)),
     async execute(interaction) {
         const target = interaction.options.getUser('target');
+        if (!target) {
+            interaction.reply(`Please mention a user.`);
+        }
 
         const userId = target.id;
 
-        interaction.reply(`The Discord ID of ${target} is ${userId}`, {"allowed_mentions": {"parse": []}});
+        interaction.reply(`The Discord ID of ${target} is ${userId}`);
     }
 };

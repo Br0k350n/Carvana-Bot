@@ -2,3 +2,4 @@ config.json
 node_modules
 .env
 Credentials.zip
+iswhitelisted-test.js
