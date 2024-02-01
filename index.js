@@ -1,10 +1,16 @@
 const fs = require('node:fs');
 const path = require('node:path');
-
+const mysql = require('mysql2');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
-
+require('dotenv').config();
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const dbConnection = mysql.createConnection({
+    host: process.env.HOST,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DBNAME
+})
 
 client.commands = new Collection();
 
@@ -30,6 +36,7 @@ client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
+
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isChatInputCommand()) return;
     const command = interaction.client.commands.get(interaction.commandName);
@@ -44,8 +51,10 @@ client.on(Events.InteractionCreate, async interaction => {
     } catch (error) {
         if (interaction.replied || interaction.deffered) {
             await interaction.followUp({content: 'There was an error while executing this command!', ephemeral: true});
+            console.error('error: ', error)
         } else {
             await interaction.reply({content: 'There was an error while executing this command!', ephemeral: true});
+            console.error('error: ', error)
         }
     }
 })
