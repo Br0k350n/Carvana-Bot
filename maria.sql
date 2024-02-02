@@ -18,6 +18,19 @@
 --
 -- Table structure for table `players`
 --
+DROP TABLE IF EXISTS `license_plates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `license_plates` (
+  `id` int(9) unsigned NOT NULL AUTO_INCREMENT,
+  `plate_number` varchar(6) NOT NULL,
+  `discordID` varchar(100) NULL,
+  `steamID` varchar(100) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+INSERT INTO `license_plates` VALUES (1, 000001, 1197315444751728761, '96192841');
+
 DROP TABLE IF EXISTS `players`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
