@@ -3,6 +3,7 @@ node_modules
 .env
 Credentials.zip
 ./commands/utility/iswhitelisted-test.js
+./commands/utility/giveimport.js
 ./commands/utility/iswhitelisted.js
 ./commands/utility/checkDB.js 
 ./commands/utility/ping.js 

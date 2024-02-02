@@ -18,18 +18,20 @@
 --
 -- Table structure for table `players`
 --
-DROP TABLE IF EXISTS `license_plates`;
+DROP TABLE IF EXISTS `processed_orders`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `license_plates` (
+CREATE TABLE `processed_orders` (
   `id` int(9) unsigned NOT NULL AUTO_INCREMENT,
-  `plate_number` varchar(6) NOT NULL,
+  `plateID` varchar(6) NOT NULL,
   `discordID` varchar(100) NULL,
   `steamID` varchar(100) NULL,
+  `order_date` DATE,
+  `order_time` TIME,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
-INSERT INTO `license_plates` VALUES (1, 000001, 1197315444751728761, '96192841');
+INSERT INTO `processed_orders` VALUES (1, '000001', 1197315444751728761, '96192841', '2022-08-01', '15:30:45');
 
 DROP TABLE IF EXISTS `players`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
