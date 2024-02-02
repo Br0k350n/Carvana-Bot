@@ -2,4 +2,10 @@ config.json
 node_modules
 .env
 Credentials.zip
-iswhitelisted-test.js
+./commands/utility/iswhitelisted-test.js
+./commands/utility/iswhitelisted.js
+./commands/utility/checkDB.js 
+./commands/utility/ping.js 
+./commands/utility/user.js 
+index.js 
+deploy-commands.js 

@@ -51,8 +51,8 @@ var dbPool = mysql.createPool({
 });
 module.exports = {
     data: new discord_js_1.SlashCommandBuilder()
-        .setName('iswhitelisted')
-        .setDescription('Check if the Discord ID or Steam ID is in the database')
+        .setName('giveimport')
+        .setDescription('Give a player an imported vehicle.')
         .addStringOption(function (option) {
         return option.setName('id')
             .setDescription('Enter the Discord or Steam ID')

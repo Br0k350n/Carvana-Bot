@@ -1,0 +1,17 @@
+
+{
+    "compilerOptions": {
+      "target": "es6",
+      "module": "CommonJS",
+      "strict": false,
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+    },
+    "include": [
+      "index.ts",
+      "commands/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+}
