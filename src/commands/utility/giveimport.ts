@@ -1,17 +1,15 @@
 import { SlashCommandBuilder, GatewayIntentBits, Client, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType } from 'discord.js';
+import {google, sheets_v4 } from 'googleapis';
+import * as mysql from 'mysql2/promise';
+require('dotenv').config();
+import * as fs from 'fs';
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         // Add other necessary intents here
     ],
 });
-import * as mysql from 'mysql2/promise';
-require('dotenv').config();
-
-const spreadsheetId = process.env.SHEET_ID;
-
-const credentials = require('../../credentials.json');
-
 const dbPool = mysql.createPool({
     host: process.env.HOST,
     user: process.env.USER,
@@ -35,6 +33,10 @@ async function generatePlateNumbers(interaction, customPlate?: string) {
 
         if (customPlate.length >= 8) {
             await interaction.reply(`Custom plate too long!`);
+            return null;
+        }
+        if (5 >= customPlate.length) {
+            await interaction.reply(`Custom plate too short!`);
             return null;
         }
 
@@ -73,7 +75,6 @@ async function addPlateToDatabase(citizenID, vehicle, plateID) {
     }
 
     try {
-        // Execute the SQL query
         await dbPool.execute('INSERT INTO player_vehicles (citizenid, vehicle, plate) VALUES (?, ?, ?)', [citizenID, vehicle, plateID]);
     } catch (error) {
         console.error('Error executing SQL query:', error);
@@ -90,7 +91,7 @@ module.exports = {
                 .setDescription('Enter the import ID.')
                 .setRequired(true))
         .addStringOption(option =>
-                option.setName('cid')
+                option.setName('citizenid')
                     .setDescription(`Enter the citizen's "Lucky Numbers". `)
                     .setRequired(true))
         .addStringOption(option =>
@@ -98,7 +99,7 @@ module.exports = {
                         .setDescription('Enter a custom license plate.')
                         .setRequired(false)),
     async execute(interaction) {
-        const idValue = interaction.options.getString('cid');
+        const idValue = interaction.options.getString('citizenid');
         const importId = interaction.options.getString('import_id');
         const isAdmin = interaction.member.roles.cache.some(role => role.name === 'admin');
         const isTester = interaction.member.roles.cache.some(role => role.name === 'tester');
@@ -110,7 +111,7 @@ module.exports = {
         try {
             let generatedPlates;
             // Check if the specified ID is in the database
-            const query = 'SELECT * FROM players WHERE cid = ?';
+            const query = 'SELECT * FROM players WHERE citizenid = ?';
             const [rows] = await dbPool.execute(query, [idValue]);
             const import_query = 'SELECT * FROM player_vehicles WHERE id = ?'
             const [importRows] = await dbPool.execute(import_query, [importId]);
@@ -125,6 +126,7 @@ module.exports = {
             }
 
             const foundcitizenId = (rows[0] as { citizenid: string }).citizenid;
+            const citizenLicense = (rows[0] as { license: string }).license;
             const foundName = (rows[0] as { name: string }).name;
             const foundImportID = (importRows[0] as { id: string }).id;
             let vehicleName = (importRows[0] as { vehicle: string }).vehicle;
@@ -158,6 +160,7 @@ module.exports = {
                 fields: [
                     { name: 'License Plate: ', value: generatedPlates || 'N/A' },
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
+                    { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
                 ],
             };
             const confirmed = {
@@ -167,6 +170,7 @@ module.exports = {
                 fields: [
                     { name: 'License Plate: ', value: generatedPlates || 'N/A' },
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
+                    { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
                 ],
             };
             const cancelled = {
@@ -210,14 +214,14 @@ module.exports = {
                 await interaction.channel.send({embeds: [cancelled]})
             }
             try {
-                if (confirmation.customId === 'confirm') {
+                if (confirmation?.customId === 'confirm') {
                     await handleConfirmation(interaction);
                 } else if (confirmation.customId === 'cancel') {
                     await handleCancellation(interaction);
                 } 
 
             } catch (e) {
-                if (confirmation.customId === 'cancel') {
+                if (confirmation?.customId === 'cancel') {
                     await interaction.channel.send({embeds: [cancelled]})   
                 }
 	            else {

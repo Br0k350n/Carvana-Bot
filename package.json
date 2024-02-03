@@ -16,6 +16,7 @@
     "discord-api-types": "^0.37.67",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.1",
+    "google-auth-library": "^9.6.2",
     "googleapis": "^131.0.0",
     "mysql2": "^3.9.1",
     "typescript": "^5.3.3"
