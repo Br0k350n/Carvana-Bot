@@ -4,7 +4,7 @@ import * as mysql from 'mysql2/promise';
 require('dotenv').config();
 import * as fs from 'fs';
 
-const credentials = JSON.parse(fs.readFileSync('../../../credentials.json', 'utf-8'));
+const credentials = JSON.parse(fs.readFileSync('credentials.json', 'utf-8'));
 const spreadsheetId = process.env.SHEET_ID;
 
 const auth = new google.auth.GoogleAuth({
@@ -20,20 +20,20 @@ const client = new Client({
     ],
 });
 
-async function addDataToSheet(name: string, citizenID: string, vehicle: string, plateID: string) {
-    const range = 'Sheet1'; 
+async function addDataToSheet(name: string, license: string, citizenID: string, vehicle: string, plateID: string) {
+    const range = 'orders'; 
     const sheet = google.sheets('v4');
     const currentDate = new Date().toISOString().slice(0, 10);
     const currentTime = new Date().toISOString().slice(11, 19);
 
-    const values = [[name, citizenID, vehicle, plateID, currentDate, currentTime]];
+    const values = [[name, license, citizenID, vehicle, plateID, currentDate, currentTime]];
     await sheet.spreadsheets.values.append({
         spreadsheetId,
         auth,
         range,
         valueInputOption: "RAW",
         requestBody: {
-            values: [values]
+            values: values
         }
     })
 
@@ -96,16 +96,14 @@ async function checkPlateExistence(plateID) {
     return rows[0].count > 0;
 }
 
-async function addPlateToDatabase(name, citizenID, vehicle, plateID) {
-    const currentDate = new Date().toISOString().slice(0, 10); 
-    const currentTime = new Date().toISOString().slice(11, 19);
+async function addPlateToDatabase(name, license, citizenID, vehicle, plateID) {
     if (citizenID === undefined || plateID === undefined) {
         console.error('Citizen ID or PlateID is undefined.');
         return;  // You may choose to handle this differently based on your requirements
     }
     try {
         await dbPool.execute('INSERT INTO player_vehicles (citizenid, vehicle, plate) VALUES (?, ?, ?)', [citizenID, vehicle, plateID]);
-        await addDataToSheet(name, citizenID, vehicle, plateID);
+        await addDataToSheet(name, license, citizenID, vehicle, plateID);
     } catch (error) {
         console.error('Error executing SQL query:', error);
     }
@@ -188,6 +186,7 @@ module.exports = {
                 title: 'Confirm Import Order',
                 description: `Do you want to confirm the import order for ${idValue} with license plate ${generatedPlates}?`,
                 fields: [
+                    { name: 'Citizen Name: ', value: foundName || 'N/A' },
                     { name: 'License Plate: ', value: generatedPlates || 'N/A' },
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
                     { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
@@ -198,6 +197,7 @@ module.exports = {
                 title: 'Congratulations!',
                 description: `Successfully issued import order to ${idValue} with license plate ${generatedPlates}.`,
                 fields: [
+                    { name: 'Citizen Name: ', value: foundName || 'N/A' },
                     { name: 'License Plate: ', value: generatedPlates || 'N/A' },
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
                     { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
@@ -235,7 +235,7 @@ module.exports = {
             confirmation.deferUpdate();
             async function handleConfirmation(interaction) {
                 if (generatedPlates !== null) {
-                    await addPlateToDatabase(foundName, foundcitizenId, vehicleName, generatedPlates);
+                    await addPlateToDatabase(foundName, citizenLicense, foundcitizenId, vehicleName, generatedPlates);
                     await interaction.channel.send({ embeds: [confirmed] })
                 }
             }
@@ -256,7 +256,6 @@ module.exports = {
                 }
 	            else {
                     await confirmation.update({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
-                    console.error(e)
                 }
 
             }
