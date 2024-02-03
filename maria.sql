@@ -28,10 +28,22 @@ CREATE TABLE `processed_orders` (
   `steamID` varchar(100) NULL,
   `order_date` DATE,
   `order_time` TIME,
+  `importID` varchar(20) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
-INSERT INTO `processed_orders` VALUES (1, '000001', 1197315444751728761, '96192841', '2022-08-01', '15:30:45');
+INSERT INTO `processed_orders` VALUES (1, '000001', 1197315444751728761, '96192841', '2022-08-01', '15:30:45', 115);
+
+DROP TABLE IF EXISTS `imports`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `imports` (
+  `name` varchar(100) NULL,
+  `importID` varchar(20),
+  PRIMARY KEY (`importID`)
+) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+INSERT INTO `imports` VALUES ('Mustang', 15);
 
 DROP TABLE IF EXISTS `players`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -42,7 +54,7 @@ CREATE TABLE `players` (
   `lName` varchar(100) NOT NULL,
   `discordID` varchar(100) NULL,
   `steamID` varchar(100) NULL,
-  `importID` varchar(100) NULL,
+  `charID` varchar(100) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

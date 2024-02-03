@@ -126,19 +126,13 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function () {
             function handleConfirmation(interaction) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var idValue, generatedPlates;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
-                            case 0:
-                                idValue = interaction.options.getString('id');
-                                return [4 /*yield*/, generatePlateNumbers()];
+                            case 0: return [4 /*yield*/, addPlateToDatabase(generatedPlates_1[0], foundDiscordId_1, foundSteamID_1)];
                             case 1:
-                                generatedPlates = _a.sent();
-                                return [4 /*yield*/, addPlateToDatabase(generatedPlates[0], foundDiscordId_1, foundSteamID_1)];
-                            case 2:
                                 _a.sent();
-                                return [4 /*yield*/, confirmation_1.update({ content: "Successfully issued import order to ".concat(idValue, " with license plate ").concat(generatedPlates[0], "."), components: [] })];
-                            case 3:
+                                return [4 /*yield*/, interaction.channel.send({ embeds: [confirmed_1] })];
+                            case 2:
                                 _a.sent();
                                 return [2 /*return*/];
                         }
@@ -151,7 +145,7 @@ module.exports = {
                         switch (_a.label) {
                             case 0: 
                             // Add your logic for handling cancellation here
-                            return [4 /*yield*/, confirmation_1.update({ content: 'Action cancelled', components: [] })];
+                            return [4 /*yield*/, interaction.channel.send({ embeds: [cancelled_1] })];
                             case 1:
                                 // Add your logic for handling cancellation here
                                 _a.sent();
@@ -160,40 +154,74 @@ module.exports = {
                     });
                 });
             }
-            var idValue, importId, query, rows, foundDiscordId_1, foundSteamID_1, generatedPlates, confirmationEmbed, confirm_1, cancel, row, response, collectorFilter, confirmation_1, e_1, error_1;
+            var idValue, importId, isAdmin, isTester, query, rows, import_query, importRows, foundDiscordId_1, foundSteamID_1, foundImportID, generatedPlates_1, confirmationEmbed, confirmed_1, cancelled_1, confirm_1, cancel, row, response, collectorFilter, confirmation, e_1, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         idValue = interaction.options.getString('id');
                         importId = interaction.options.getString('import_id');
+                        isAdmin = interaction.member.roles.cache.some(function (role) { return role.name === 'admin'; });
+                        isTester = interaction.member.roles.cache.some(function (role) { return role.name === 'tester'; });
+                        if (!isAdmin && !isTester) {
+                            return [2 /*return*/, interaction.reply('You do not have the necessary role to use this command.')];
+                        }
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 16, , 17]);
+                        _a.trys.push([1, 18, , 19]);
                         query = 'SELECT discordID, steamID FROM players WHERE discordID = ? OR steamID = ?';
                         return [4 /*yield*/, dbPool.execute(query, [idValue, idValue])];
                     case 2:
                         rows = (_a.sent())[0];
+                        import_query = 'SELECT importID FROM imports WHERE importID = ?';
+                        return [4 /*yield*/, dbPool.execute(import_query, [importId])];
+                    case 3:
+                        importRows = (_a.sent())[0];
                         if (!Array.isArray(rows) || rows.length === 0) {
                             interaction.reply("The ID ".concat(idValue, " is not in the database."));
                             return [2 /*return*/];
                         }
+                        if (!Array.isArray(importRows) || importRows.length === 0) {
+                            interaction.reply("The ID ".concat(importId, " is not in the database."));
+                            return [2 /*return*/];
+                        }
                         foundDiscordId_1 = rows[0].discordID;
                         foundSteamID_1 = rows[0].steamID;
+                        foundImportID = importRows[0].importID;
                         if (foundDiscordId_1 !== idValue && foundSteamID_1 !== idValue) {
                             interaction.reply("The ID ".concat(idValue, " is not associated with the specified Discord or Steam ID."));
                             return [2 /*return*/];
                         }
+                        if (foundImportID !== importId) {
+                            interaction.reply("The ID ".concat(foundImportID, " is not associated with any imported vehicle, please try again."));
+                            return [2 /*return*/];
+                        }
                         return [4 /*yield*/, generatePlateNumbers()];
-                    case 3:
-                        generatedPlates = _a.sent();
+                    case 4:
+                        generatedPlates_1 = _a.sent();
                         confirmationEmbed = {
                             color: 0x0099FF,
                             title: 'Confirm Import Order',
-                            description: "Do you want to confirm the import order for ".concat(idValue, " with license plate ").concat(generatedPlates[0], "?"),
+                            description: "Do you want to confirm the import order for ".concat(idValue, " with license plate ").concat(generatedPlates_1[0], "?"),
                             fields: [
-                                { name: 'License Plate', value: generatedPlates[0] },
-                                // Add more fields as needed
+                                { name: 'License Plate: ', value: generatedPlates_1[0] || 'N/A' },
+                                { name: 'Discord ID: ', value: foundDiscordId_1 || 'N/A' },
+                                { name: 'Steam ID: ', value: foundSteamID_1 || 'N/A' },
                             ],
+                        };
+                        confirmed_1 = {
+                            color: 0x0099FF,
+                            title: 'Congratulations!',
+                            description: "Successfully issued import order to ".concat(idValue, " with license plate ").concat(generatedPlates_1[0], "."),
+                            fields: [
+                                { name: 'License Plate: ', value: generatedPlates_1[0] || 'N/A' },
+                                { name: 'Discord ID: ', value: foundDiscordId_1 || 'N/A' },
+                                { name: 'Steam ID: ', value: foundSteamID_1 || 'N/A' },
+                            ],
+                        };
+                        cancelled_1 = {
+                            color: 0x0099FF,
+                            title: 'Action Incomplete',
+                            description: "Action has been cancelled"
                         };
                         confirm_1 = new discord_js_1.ButtonBuilder()
                             .setCustomId('confirm')
@@ -210,45 +238,48 @@ module.exports = {
                                 embeds: [confirmationEmbed],
                                 components: [row],
                             })];
-                    case 4:
-                        response = _a.sent();
-                        collectorFilter = function (i) { return i.user.id === interaction.user.id; };
-                        return [4 /*yield*/, response.awaitMessageComponent({ filter: collectorFilter, time: 60000 })];
                     case 5:
-                        confirmation_1 = _a.sent();
-                        _a.label = 6;
+                        response = _a.sent();
+                        collectorFilter = function (i) { return i.customId == 'confirm' || i.customId == 'cancel'; };
+                        return [4 /*yield*/, response.awaitMessageComponent({ filter: collectorFilter, time: 60000 })];
                     case 6:
-                        _a.trys.push([6, 11, , 15]);
-                        if (!(confirmation_1.customId === 'confirm')) return [3 /*break*/, 8];
-                        return [4 /*yield*/, handleConfirmation(interaction)];
+                        confirmation = _a.sent();
+                        confirmation.deferUpdate();
+                        _a.label = 7;
                     case 7:
-                        _a.sent();
-                        return [3 /*break*/, 10];
+                        _a.trys.push([7, 12, , 17]);
+                        if (!(confirmation.customId === 'confirm')) return [3 /*break*/, 9];
+                        return [4 /*yield*/, handleConfirmation(interaction)];
                     case 8:
-                        if (!(confirmation_1.customId === 'cancel')) return [3 /*break*/, 10];
-                        return [4 /*yield*/, handleCancellation(interaction)];
-                    case 9:
                         _a.sent();
-                        _a.label = 10;
-                    case 10: return [3 /*break*/, 15];
-                    case 11:
+                        return [3 /*break*/, 11];
+                    case 9:
+                        if (!(confirmation.customId === 'cancel')) return [3 /*break*/, 11];
+                        return [4 /*yield*/, handleCancellation(interaction)];
+                    case 10:
+                        _a.sent();
+                        _a.label = 11;
+                    case 11: return [3 /*break*/, 17];
+                    case 12:
                         e_1 = _a.sent();
-                        if (!(confirmation_1.customId === 'cancel')) return [3 /*break*/, 12];
-                        interaction.editReply({ content: 'Import order has been cancelled.', components: [] });
-                        return [3 /*break*/, 14];
-                    case 12: return [4 /*yield*/, interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] })];
+                        if (!(confirmation.customId === 'cancel')) return [3 /*break*/, 14];
+                        return [4 /*yield*/, interaction.channel.send({ embeds: [cancelled_1] })];
                     case 13:
                         _a.sent();
+                        return [3 /*break*/, 16];
+                    case 14: return [4 /*yield*/, confirmation.update({ content: 'Confirmation not received within 1 minute, cancelling', components: [] })];
+                    case 15:
+                        _a.sent();
                         console.error(e_1);
-                        _a.label = 14;
-                    case 14: return [3 /*break*/, 15];
-                    case 15: return [3 /*break*/, 17];
-                    case 16:
+                        _a.label = 16;
+                    case 16: return [3 /*break*/, 17];
+                    case 17: return [3 /*break*/, 19];
+                    case 18:
                         error_1 = _a.sent();
                         console.error("Error checking database or generating import: ", error_1);
-                        interaction.editReply("Error processing the import.");
-                        return [3 /*break*/, 17];
-                    case 17: return [2 /*return*/];
+                        interaction.reply("Error ".concat(error_1));
+                        return [3 /*break*/, 19];
+                    case 19: return [2 /*return*/];
                 }
             });
         });

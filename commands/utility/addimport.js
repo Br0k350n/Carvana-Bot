@@ -36,65 +36,79 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// commands/checkdb.js
 var discord_js_1 = require("discord.js");
 var mysql = require("mysql2/promise");
-require('dotenv').config();
+// Create a Discord client
+var client = new discord_js_1.Client({
+    intents: [discord_js_1.GatewayIntentBits.Guilds],
+});
+// ... (other configurations, database setup, etc.)
+// Define your database connection pool
 var dbPool = mysql.createPool({
+    // Your database connection details
     host: process.env.HOST,
     user: process.env.USER,
     password: process.env.PASSWORD,
     database: process.env.DBNAME,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
 });
+function addImportToDatabase(importName, importID) {
+    return __awaiter(this, void 0, void 0, function () {
+        var error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, dbPool.execute('INSERT INTO imports (name, importID) VALUES (?, ?)', [importName, importID])];
+                case 1:
+                    _a.sent();
+                    console.log("Import ".concat(importName, " with ID ").concat(importID, " added to the database."));
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_1 = _a.sent();
+                    console.error('Error adding import to the database:', error_1);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
 module.exports = {
     data: new discord_js_1.SlashCommandBuilder()
-        .setName('iswhitelisted')
-        .setDescription('Check if the Discord ID or Steam ID is in the database')
+        .setName('addimport')
+        .setDescription('Add a new import to the database.')
         .addStringOption(function (option) {
-        return option.setName('id')
-            .setDescription('Enter the Discord or Steam ID')
+        return option.setName('import_name')
+            .setDescription('Enter the name of the import.')
             .setRequired(true);
     })
         .addStringOption(function (option) {
         return option.setName('import_id')
-            .setDescription('Enter the import ID.')
+            .setDescription('Enter the ID of the import.')
             .setRequired(true);
     }),
     execute: function (interaction) {
         return __awaiter(this, void 0, void 0, function () {
-            var idValue, query, rows, foundDiscordId, foundSteamID, error_1;
+            var importName, importID, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        idValue = interaction.options.getString("id");
+                        importName = interaction.options.getString('import_name');
+                        importID = interaction.options.getString('import_id');
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        query = 'SELECT discordID, steamID FROM players WHERE discordID = ? OR steamID = ?';
-                        return [4 /*yield*/, dbPool.execute(query, [idValue, idValue])];
+                        return [4 /*yield*/, addImportToDatabase(importName, importID)];
                     case 2:
-                        rows = (_a.sent())[0];
-                        if (Array.isArray(rows) && rows.length > 0) {
-                            foundDiscordId = rows[0].discordID;
-                            foundSteamID = rows[0].steamID;
-                            if (foundDiscordId === idValue) {
-                                interaction.reply("The Discord ID \"".concat(idValue, "\" is in the database."));
-                            }
-                            else if (foundSteamID === idValue) {
-                                interaction.reply("The Steam ID \"STEAM_0:1:".concat(idValue, "\" is in the database."));
-                            }
-                        }
-                        else {
-                            interaction.reply("The ID ".concat(idValue, " is not in the database."));
-                        }
+                        _a.sent();
+                        interaction.reply("Import ".concat(importName, " with ID ").concat(importID, " has been added to the database."));
                         return [3 /*break*/, 4];
                     case 3:
-                        error_1 = _a.sent();
-                        console.error("Error checking database: ", error_1);
-                        interaction.reply("Error checking the database.");
+                        error_2 = _a.sent();
+                        console.error('Error in execute function:', error_2);
+                        interaction.reply('An error occurred while processing the command.');
                         return [3 /*break*/, 4];
                     case 4: return [2 /*return*/];
                 }

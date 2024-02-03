@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, GatewayIntentBits, Client, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, GatewayIntentBits, Client, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType } from 'discord.js';
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -17,11 +17,6 @@ const dbPool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0
 });
-
-
-
-
-
 
 async function generatePlateNumbers() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -71,24 +66,39 @@ module.exports = {
     async execute(interaction) {
         const idValue = interaction.options.getString('id');
         const importId = interaction.options.getString('import_id');
+        const isAdmin = interaction.member.roles.cache.some(role => role.name === 'admin');
+        const isTester = interaction.member.roles.cache.some(role => role.name === 'tester');
+
+        if (!isAdmin && !isTester) {
+            return interaction.reply('You do not have the necessary role to use this command.');
+        }
 
         try {
             // Check if the specified ID is in the database
             const query = 'SELECT discordID, steamID FROM players WHERE discordID = ? OR steamID = ?';
             const [rows] = await dbPool.execute(query, [idValue, idValue]);
-
+            const import_query = 'SELECT importID FROM imports WHERE importID = ?'
+            const [importRows] = await dbPool.execute(import_query, [importId]);
             if (!Array.isArray(rows) || rows.length === 0) {
                 interaction.reply(`The ID ${idValue} is not in the database.`);
+                return;
+            }
+            if (!Array.isArray(importRows) || importRows.length === 0) {
+                interaction.reply(`The ID ${importId} is not in the database.`);
                 return;
             }
 
             const foundDiscordId = (rows[0] as { discordID: string }).discordID;
             const foundSteamID = (rows[0] as { steamID: string }).steamID;
-
-            
+            const foundImportID = (importRows[0] as { importID: string }).importID;
 
             if (foundDiscordId !== idValue && foundSteamID !== idValue) {
                 interaction.reply(`The ID ${idValue} is not associated with the specified Discord or Steam ID.`);
+                return;
+            }
+
+            if (foundImportID !== importId) {
+                interaction.reply(`The ID ${foundImportID} is not associated with any imported vehicle, please try again.`);
                 return;
             }
 
@@ -100,23 +110,39 @@ module.exports = {
                 title: 'Confirm Import Order',
                 description: `Do you want to confirm the import order for ${idValue} with license plate ${generatedPlates[0]}?`,
                 fields: [
-                    { name: 'License Plate', value: generatedPlates[0] },
-                    // Add more fields as needed
+                    { name: 'License Plate: ', value: generatedPlates[0] || 'N/A' },
+                    { name: 'Discord ID: ', value: foundDiscordId || 'N/A' },
+                    { name: 'Steam ID: ', value: foundSteamID || 'N/A' },
                 ],
             };
-            
+            const confirmed = {
+                color: 0x0099FF,
+                title: 'Congratulations!',
+                description: `Successfully issued import order to ${idValue} with license plate ${generatedPlates[0]}.`,
+                fields: [
+                    { name: 'License Plate: ', value: generatedPlates[0] || 'N/A' },
+                    { name: 'Discord ID: ', value: foundDiscordId || 'N/A' },
+                    { name: 'Steam ID: ', value: foundSteamID || 'N/A' },
+                ],
+            };
+            const cancelled = {
+                color: 0x0099FF,
+                title: 'Action Incomplete',
+                description: `Action has been cancelled`
+            };
+
             // Create a row of buttons
-            const confirm = new ButtonBuilder()
+            const confirm: ButtonBuilder = new ButtonBuilder()
 			    .setCustomId('confirm')
 			    .setLabel('Confirm Order')
 			    .setStyle(ButtonStyle.Primary);
 
-		    const cancel = new ButtonBuilder()
+		    const cancel: ButtonBuilder = new ButtonBuilder()
 			    .setCustomId('cancel')
 			    .setLabel('Cancel')
 			    .setStyle(ButtonStyle.Danger);
 
-		    const row = new ActionRowBuilder()
+		    const row: ActionRowBuilder = new ActionRowBuilder()
 			    .addComponents(cancel, confirm);
             
             // Send the confirmation embed with attached buttons
@@ -126,40 +152,38 @@ module.exports = {
                 components: [row],
             });
 
+            const collectorFilter = i => i.customId == 'confirm' || i.customId == 'cancel';
+            const confirmation = await response.awaitMessageComponent({ filter: collectorFilter, time: 60_000});
+            confirmation.deferUpdate();
+
             async function handleConfirmation(interaction) {
-                // Add your logic for handling confirmation here
-                const idValue = interaction.options.getString('id');
-                const generatedPlates = await generatePlateNumbers();
                 await addPlateToDatabase(generatedPlates[0], foundDiscordId, foundSteamID);
-                await confirmation.update({ content: `Successfully issued import order to ${idValue} with license plate ${generatedPlates[0]}.`, components: [] });
+                await interaction.channel.send({embeds: [confirmed]})
             }
             async function handleCancellation(interaction) {
                 // Add your logic for handling cancellation here
-                await confirmation.update({ content: 'Action cancelled', components: [] });
+                await interaction.channel.send({embeds: [cancelled]})
             }
-            
-            const collectorFilter = i => i.user.id === interaction.user.id;
-            const confirmation = await response.awaitMessageComponent({ filter: collectorFilter, time: 60_000 });
             try {
                 if (confirmation.customId === 'confirm') {
                     await handleConfirmation(interaction);
                 } else if (confirmation.customId === 'cancel') {
                     await handleCancellation(interaction);
-                }
+                } 
 
             } catch (e) {
                 if (confirmation.customId === 'cancel') {
-                    interaction.editReply({ content: 'Import order has been cancelled.', components: [] });
+                    await interaction.channel.send({embeds: [cancelled]})   
                 }
 	            else {
-                    await interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
+                    await confirmation.update({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
                     console.error(e)
                 }
 
             }
         } catch (error) {
             console.error(`Error checking database or generating import: `, error);
-            interaction.editReply(`Error processing the import.`);
+            interaction.reply(`Error ${error}`)
         }
     },
 };
