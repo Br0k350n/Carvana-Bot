@@ -4,12 +4,42 @@ import * as mysql from 'mysql2/promise';
 require('dotenv').config();
 import * as fs from 'fs';
 
+const credentials = JSON.parse(fs.readFileSync('../../../credentials.json', 'utf-8'));
+const spreadsheetId = process.env.SHEET_ID;
+
+const auth = new google.auth.GoogleAuth({
+    credentials,
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+});
+
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         // Add other necessary intents here
     ],
 });
+
+async function addDataToSheet(name: string, citizenID: string, vehicle: string, plateID: string) {
+    const range = 'Sheet1'; 
+    const sheet = google.sheets('v4');
+    const currentDate = new Date().toISOString().slice(0, 10);
+    const currentTime = new Date().toISOString().slice(11, 19);
+
+    const values = [[name, citizenID, vehicle, plateID, currentDate, currentTime]];
+    await sheet.spreadsheets.values.append({
+        spreadsheetId,
+        auth,
+        range,
+        valueInputOption: "RAW",
+        requestBody: {
+            values: [values]
+        }
+    })
+
+}
+
+
 const dbPool = mysql.createPool({
     host: process.env.HOST,
     user: process.env.USER,
@@ -66,16 +96,16 @@ async function checkPlateExistence(plateID) {
     return rows[0].count > 0;
 }
 
-async function addPlateToDatabase(citizenID, vehicle, plateID) {
+async function addPlateToDatabase(name, citizenID, vehicle, plateID) {
     const currentDate = new Date().toISOString().slice(0, 10); 
     const currentTime = new Date().toISOString().slice(11, 19);
     if (citizenID === undefined || plateID === undefined) {
         console.error('Citizen ID or PlateID is undefined.');
         return;  // You may choose to handle this differently based on your requirements
     }
-
     try {
         await dbPool.execute('INSERT INTO player_vehicles (citizenid, vehicle, plate) VALUES (?, ?, ?)', [citizenID, vehicle, plateID]);
+        await addDataToSheet(name, citizenID, vehicle, plateID);
     } catch (error) {
         console.error('Error executing SQL query:', error);
     }
@@ -205,7 +235,7 @@ module.exports = {
             confirmation.deferUpdate();
             async function handleConfirmation(interaction) {
                 if (generatedPlates !== null) {
-                    await addPlateToDatabase(foundcitizenId, vehicleName, generatedPlates);
+                    await addPlateToDatabase(foundName, foundcitizenId, vehicleName, generatedPlates);
                     await interaction.channel.send({ embeds: [confirmed] })
                 }
             }
