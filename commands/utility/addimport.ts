@@ -19,6 +19,9 @@ const dbPool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0,
 });
+function capitalizeFirstLetter(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 async function addImportToDatabase(importName, importID) {
     try {
@@ -43,13 +46,23 @@ module.exports = {
                 .setDescription('Enter the ID of the import.')
                 .setRequired(true)),
     async execute(interaction) {
-        const importName = interaction.options.getString('import_name');
+        const importName: string = capitalizeFirstLetter(interaction.options.getString('import_name'));
         const importID = interaction.options.getString('import_id');
 
         try {
-            await addImportToDatabase(importName, importID);
-    
-            interaction.reply(`Import ${importName} with ID ${importID} has been added to the database.`);
+            const importExists = 'SELECT COUNT(*) as count FROM imports WHERE importID = ?'
+            const importNameExists = 'SELECT COUNT(*) as count FROM imports WHERE name = ?'
+            const [importRows] = await dbPool.execute(importExists, [importID]);
+            const [importNameRows] = await dbPool.execute(importNameExists, [importName]);
+
+            if (importRows[0].count > 0) {
+                interaction.reply(`Import ID '${importID}' is already in use.`);
+            } else if (importNameRows[0].count > 0){
+                interaction.reply(`Import name '${importName}' is already in use.`);
+            } else {
+                await addImportToDatabase(importName, importID);
+                interaction.reply(`Import ${importName} with ID ${importID} has been added to the database.`);
+            }
         } catch (error) {
             console.error('Error in execute function:', error);
             interaction.reply('An error occurred while processing the command.');
