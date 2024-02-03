@@ -12,12 +12,7 @@ declare module 'discord.js' {
 }
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-const dbConnection = mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.USER,
-    password: process.env.PASSWORD,
-    database: process.env.DBNAME
-})
+
 
 client.commands = new Collection<string, any>();
 

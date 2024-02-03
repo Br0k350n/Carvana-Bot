@@ -1,18 +1,23 @@
 {
-  "name": "dev",
+  "name": "carvana",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "package": "pkg index.js --output carvana"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^20.11.16",
     "discord-api-types": "^0.37.67",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.1",
-    "mysql2": "^3.9.1"
+    "googleapis": "^131.0.0",
+    "mysql2": "^3.9.1",
+    "typescript": "^5.3.3"
   }
 }

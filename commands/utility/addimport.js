@@ -56,7 +56,7 @@ function capitalizeFirstLetter(str) {
 function addImportToDatabase(importName, importID) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield dbPool.execute('INSERT INTO imports (name, importID) VALUES (?, ?)', [importName, importID]);
+            yield dbPool.execute('INSERT INTO player_vehicles (vehicle, hash) VALUES (?, ?)', [importName, importID]);
             console.log(`Import ${importName} with ID ${importID} added to the database.`);
         }
         catch (error) {

@@ -50,61 +50,89 @@ const dbPool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0
 });
-function generatePlateNumbers() {
+function generatePlateNumbers(interaction, customPlate) {
     return __awaiter(this, void 0, void 0, function* () {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        if (customPlate) {
+            // If a custom plate is provided, check its existence
+            const isPlateExists = yield checkPlateExistence(customPlate);
+            if (isPlateExists) {
+                return interaction.reply(`Custom plate already exists!`);
+                ; // Return null to indicate that the plate already exists
+            }
+            if (customPlate.length >= 8) {
+                yield interaction.channel.send(`Custom plate too long!`);
+                return null; // Return null to indicate that the plate is too long
+            }
+            return customPlate; // Return the custom plate
+        }
+        // If no custom plate is provided, generate a random one
         const plateID = Array.from({ length: 6 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
         // Check if the generated plateNumber already exists in the database
         const isPlateExists = yield checkPlateExistence(plateID);
         // If the plateNumber already exists, recursively call the function to generate a new one
         if (isPlateExists) {
-            return generatePlateNumbers();
+            console.log('Generated plate already exists, regenerating...');
+            return generatePlateNumbers(interaction);
         }
-        // If the plateNumber is unique, return it as an array
-        return [plateID];
+        // If the plateNumber is unique, return it as a string
+        return plateID;
     });
 }
 function checkPlateExistence(plateID) {
     return __awaiter(this, void 0, void 0, function* () {
-        const [rows] = yield dbPool.execute('SELECT COUNT(*) as count FROM processed_orders WHERE plateID = ?', [plateID]);
+        const [rows] = yield dbPool.execute('SELECT COUNT(*) as count FROM player_vehicles WHERE plate = ?', [plateID]);
         return rows[0].count > 0;
     });
 }
-function addPlateToDatabase(plateID, discordId, steamId) {
+function addPlateToDatabase(citizenID, vehicle, plateID) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log("Adding plate to database - Citizen ID:", citizenID, "Vehicle:", vehicle, "Plate ID:", plateID);
         const currentDate = new Date().toISOString().slice(0, 10);
         const currentTime = new Date().toISOString().slice(11, 19);
-        if (discordId === undefined || steamId === undefined) {
-            console.error('discordId or steamId is undefined');
+        if (citizenID === undefined || plateID === undefined) {
+            console.error('Citizen ID or PlateID is undefined.');
             return; // You may choose to handle this differently based on your requirements
         }
-        yield dbPool.execute('INSERT INTO processed_orders (plateID, discordID, steamID, order_date, order_time) VALUES (?, ?, ?, ?, ?)', [plateID, discordId, steamId, currentDate, currentTime]);
+        try {
+            // Execute the SQL query
+            yield dbPool.execute('INSERT INTO player_vehicles (citizenid, vehicle, plate) VALUES (?, ?, ?)', [citizenID, vehicle, plateID]);
+        }
+        catch (error) {
+            console.error('Error executing SQL query:', error);
+        }
     });
 }
 module.exports = {
     data: new discord_js_1.SlashCommandBuilder()
         .setName('giveimport')
         .setDescription('Give a player an imported vehicle.')
-        .addStringOption(option => option.setName('id')
-        .setDescription('Enter the Discord or Steam ID')
-        .setRequired(true))
         .addStringOption(option => option.setName('import_id')
         .setDescription('Enter the import ID.')
-        .setRequired(true)),
+        .setRequired(true))
+        .addStringOption(option => option.setName('citizen_id')
+        .setDescription('Enter the citizen ID.')
+        .setRequired(true))
+        .addStringOption(option => option.setName('cp')
+        .setDescription('Enter a custom license plate.')
+        .setRequired(false)),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            const idValue = interaction.options.getString('id');
+            const idValue = interaction.options.getString('citizen_id');
             const importId = interaction.options.getString('import_id');
             const isAdmin = interaction.member.roles.cache.some(role => role.name === 'admin');
             const isTester = interaction.member.roles.cache.some(role => role.name === 'tester');
+            const license_plate = interaction.options.getString('cp');
+            console.log(license_plate);
             if (!isAdmin && !isTester) {
                 return interaction.reply('You do not have the necessary role to use this command.');
             }
             try {
+                let generatedPlates;
                 // Check if the specified ID is in the database
-                const query = 'SELECT discordID, steamID FROM players WHERE discordID = ? OR steamID = ?';
-                const [rows] = yield dbPool.execute(query, [idValue, idValue]);
-                const import_query = 'SELECT importID FROM imports WHERE importID = ?';
+                const query = 'SELECT citizenid FROM players WHERE citizenid = ?';
+                const [rows] = yield dbPool.execute(query, [idValue]);
+                const import_query = 'SELECT * FROM player_vehicles WHERE id = ?';
                 const [importRows] = yield dbPool.execute(import_query, [importId]);
                 if (!Array.isArray(rows) || rows.length === 0) {
                     interaction.reply(`The ID ${idValue} is not in the database.`);
@@ -114,37 +142,46 @@ module.exports = {
                     interaction.reply(`The ID ${importId} is not in the database.`);
                     return;
                 }
-                const foundDiscordId = rows[0].discordID;
-                const foundSteamID = rows[0].steamID;
-                const foundImportID = importRows[0].importID;
-                if (foundDiscordId !== idValue && foundSteamID !== idValue) {
-                    interaction.reply(`The ID ${idValue} is not associated with the specified Discord or Steam ID.`);
+                const foundcitizenId = rows[0].citizenid;
+                const foundImportID = importRows[0].id;
+                console.log(foundImportID);
+                console.log(importId);
+                let vehicleName = importRows[0].vehicle;
+                if (foundcitizenId !== idValue) {
+                    interaction.reply(`The ID ${idValue} is not associated with any citizen.`);
                     return;
                 }
-                if (foundImportID !== importId) {
+                if (String(foundImportID) !== String(importId)) {
                     interaction.reply(`The ID ${foundImportID} is not associated with any imported vehicle, please try again.`);
                     return;
                 }
-                const generatedPlates = yield generatePlateNumbers();
+                generatedPlates = yield generatePlateNumbers(interaction, license_plate);
+                if (generatedPlates.customPlate === null) {
+                    if (generatedPlates === null) {
+                        return;
+                    }
+                    else {
+                        generatedPlates = generatePlateNumbers(interaction);
+                        return;
+                    }
+                }
                 // Creating a confirmation embed with buttons
                 const confirmationEmbed = {
                     color: 0x0099FF,
                     title: 'Confirm Import Order',
-                    description: `Do you want to confirm the import order for ${idValue} with license plate ${generatedPlates[0]}?`,
+                    description: `Do you want to confirm the import order for ${idValue} with license plate ${generatedPlates}?`,
                     fields: [
-                        { name: 'License Plate: ', value: generatedPlates[0] || 'N/A' },
-                        { name: 'Discord ID: ', value: foundDiscordId || 'N/A' },
-                        { name: 'Steam ID: ', value: foundSteamID || 'N/A' },
+                        { name: 'License Plate: ', value: generatedPlates || 'N/A' },
+                        { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
                     ],
                 };
                 const confirmed = {
                     color: 0x0099FF,
                     title: 'Congratulations!',
-                    description: `Successfully issued import order to ${idValue} with license plate ${generatedPlates[0]}.`,
+                    description: `Successfully issued import order to ${idValue} with license plate ${generatedPlates}.`,
                     fields: [
-                        { name: 'License Plate: ', value: generatedPlates[0] || 'N/A' },
-                        { name: 'Discord ID: ', value: foundDiscordId || 'N/A' },
-                        { name: 'Steam ID: ', value: foundSteamID || 'N/A' },
+                        { name: 'License Plate: ', value: generatedPlates || 'N/A' },
+                        { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
                     ],
                 };
                 const cancelled = {
@@ -174,8 +211,10 @@ module.exports = {
                 confirmation.deferUpdate();
                 function handleConfirmation(interaction) {
                     return __awaiter(this, void 0, void 0, function* () {
-                        yield addPlateToDatabase(generatedPlates[0], foundDiscordId, foundSteamID);
-                        yield interaction.channel.send({ embeds: [confirmed] });
+                        if (generatedPlates !== null) {
+                            yield addPlateToDatabase(foundcitizenId, vehicleName, generatedPlates);
+                            yield interaction.channel.send({ embeds: [confirmed] });
+                        }
                     });
                 }
                 function handleCancellation(interaction) {

@@ -19,13 +19,14 @@ const dbPool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0,
 });
+
 function capitalizeFirstLetter(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 async function addImportToDatabase(importName, importID) {
     try {
-        await dbPool.execute('INSERT INTO imports (name, importID) VALUES (?, ?)', [importName, importID]);
+        await dbPool.execute('INSERT INTO player_vehicles (vehicle, hash) VALUES (?, ?)', [importName, importID]);
         console.log(`Import ${importName} with ID ${importID} added to the database.`);
     } catch (error) {
         console.error('Error adding import to the database:', error);
