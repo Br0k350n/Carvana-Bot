@@ -54,29 +54,32 @@ function generatePlateNumbers(interaction, customPlate) {
     return __awaiter(this, void 0, void 0, function* () {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         if (customPlate) {
-            // If a custom plate is provided, check its existence
             const isPlateExists = yield checkPlateExistence(customPlate);
             if (isPlateExists) {
-                return interaction.reply(`Custom plate already exists!`);
-                ; // Return null to indicate that the plate already exists
+                yield interaction.reply(`Custom plate already exists!`);
+                return null;
             }
             if (customPlate.length >= 8) {
-                yield interaction.channel.send(`Custom plate too long!`);
-                return null; // Return null to indicate that the plate is too long
+                yield interaction.reply(`Custom plate too long!`);
+                return null;
             }
-            return customPlate; // Return the custom plate
+            return customPlate;
         }
         // If no custom plate is provided, generate a random one
-        const plateID = Array.from({ length: 6 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
-        // Check if the generated plateNumber already exists in the database
-        const isPlateExists = yield checkPlateExistence(plateID);
-        // If the plateNumber already exists, recursively call the function to generate a new one
-        if (isPlateExists) {
-            console.log('Generated plate already exists, regenerating...');
-            return generatePlateNumbers(interaction);
+        let plateID;
+        let isPlateExists;
+        for (let i = 0; i < 10; i++) {
+            plateID = Array.from({ length: 6 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
+            isPlateExists = yield checkPlateExistence(plateID);
+            if (!isPlateExists) {
+                break;
+            }
         }
-        // If the plateNumber is unique, return it as a string
-        return plateID;
+        if (isPlateExists) {
+            yield interaction.reply('Unable to generate a unique plate. Please try again.');
+            return null;
+        }
+        return plateID; // Return the generated plate
     });
 }
 function checkPlateExistence(plateID) {
@@ -156,14 +159,12 @@ module.exports = {
                     return;
                 }
                 generatedPlates = yield generatePlateNumbers(interaction, license_plate);
+                if (generatedPlates === null) {
+                    return;
+                }
                 if (generatedPlates.customPlate === null) {
-                    if (generatedPlates === null) {
-                        return;
-                    }
-                    else {
-                        generatedPlates = generatePlateNumbers(interaction);
-                        return;
-                    }
+                    generatedPlates = generatePlateNumbers(interaction);
+                    return;
                 }
                 // Creating a confirmation embed with buttons
                 const confirmationEmbed = {
