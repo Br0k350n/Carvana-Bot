@@ -8,6 +8,10 @@ const client = new Client({
 import * as mysql from 'mysql2/promise';
 require('dotenv').config();
 
+const spreadsheetId = process.env.SHEET_ID;
+
+const credentials = require('../../credentials.json');
+
 const dbPool = mysql.createPool({
     host: process.env.HOST,
     user: process.env.USER,
@@ -61,7 +65,6 @@ async function checkPlateExistence(plateID) {
 }
 
 async function addPlateToDatabase(citizenID, vehicle, plateID) {
-    console.log("Adding plate to database - Citizen ID:", citizenID, "Vehicle:", vehicle, "Plate ID:", plateID);
     const currentDate = new Date().toISOString().slice(0, 10); 
     const currentTime = new Date().toISOString().slice(11, 19);
     if (citizenID === undefined || plateID === undefined) {
@@ -87,20 +90,19 @@ module.exports = {
                 .setDescription('Enter the import ID.')
                 .setRequired(true))
         .addStringOption(option =>
-                option.setName('citizen_id')
-                    .setDescription('Enter the citizen ID.')
+                option.setName('cid')
+                    .setDescription(`Enter the citizen's "Lucky Numbers". `)
                     .setRequired(true))
         .addStringOption(option =>
                     option.setName('cp')
                         .setDescription('Enter a custom license plate.')
                         .setRequired(false)),
     async execute(interaction) {
-        const idValue = interaction.options.getString('citizen_id');
+        const idValue = interaction.options.getString('cid');
         const importId = interaction.options.getString('import_id');
         const isAdmin = interaction.member.roles.cache.some(role => role.name === 'admin');
         const isTester = interaction.member.roles.cache.some(role => role.name === 'tester');
         const license_plate = interaction.options.getString('cp');
-        console.log(license_plate);
         if (!isAdmin && !isTester) {
             return interaction.reply('You do not have the necessary role to use this command.');
         }
@@ -108,7 +110,7 @@ module.exports = {
         try {
             let generatedPlates;
             // Check if the specified ID is in the database
-            const query = 'SELECT citizenid FROM players WHERE citizenid = ?';
+            const query = 'SELECT * FROM players WHERE cid = ?';
             const [rows] = await dbPool.execute(query, [idValue]);
             const import_query = 'SELECT * FROM player_vehicles WHERE id = ?'
             const [importRows] = await dbPool.execute(import_query, [importId]);
@@ -123,9 +125,8 @@ module.exports = {
             }
 
             const foundcitizenId = (rows[0] as { citizenid: string }).citizenid;
+            const foundName = (rows[0] as { name: string }).name;
             const foundImportID = (importRows[0] as { id: string }).id;
-            console.log(foundImportID);
-            console.log(importId);
             let vehicleName = (importRows[0] as { vehicle: string }).vehicle;
             if (foundcitizenId !== idValue) {
                 interaction.reply(`The ID ${idValue} is not associated with any citizen.`);
