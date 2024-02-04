@@ -15,7 +15,7 @@ const dbPool = mysql.createPool({
     host: process.env.HOST,
     user: process.env.USER,
     password: process.env.PASSWORD,
-    database: process.env.DBNAME,
+    database: process.env.DB2NAME,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -29,8 +29,8 @@ function formatString(template: string, ...values: string[]): string {
     return result;
   }
 
-function capitalizeFirstLetter(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+  function capitalizeFirstLetter(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
 async function addImportToVehicleLua(import_id: string, import_name: string, import_make: string, import_cat: string) {
@@ -62,13 +62,13 @@ async function addImportToVehicleLua(import_id: string, import_name: string, imp
         console.error('Error adding import to the vehicles.lua:', error);
     }
 }
-async function addImportToDatabase(import_id: string, import_name: string, import_make: string, import_cat: string) {
-    let importPrice: number = 0;
-    let importData = {import_id, import_name, import_make, importPrice, import_cat};
+
+async function addImportToDatabase(import_id: string, import_name: string) {
     try {
+        await dbPool.execute('INSERT INTO vehicles (vehicle, spawnid) VALUES (?, ?)',[import_name, import_id]);
         
     } catch (error) {
-        console.error('Error adding import to the vehicles.lua:', error);
+        console.error('Error executing SQL query:', error);
     }
 }
 
@@ -93,14 +93,15 @@ module.exports = {
                     .setDescription('Enter the ID of the import.')
                     .setRequired(true)),        
     async execute(interaction) {
-        const import_name: string = capitalizeFirstLetter(interaction.options.getString('import_name'));
-        const import_id = capitalizeFirstLetter(interaction.options.getString('import_id'));
-        const import_make = interaction.options.getString('import_make');
-        const import_cat = interaction.options.getString('import_cat');
+        const import_name: string = interaction.options.getString('import_name').toLowerCase();
+        const import_id = interaction.options.getString('import_id').toLowerCase();
+        const import_make = interaction.options.getString('import_make').toLowerCase();
+        const import_cat = interaction.options.getString('import_cat').toLowerCase();
 
         try {
                 await addImportToVehicleLua(import_id, import_name, import_make, import_cat);
-                interaction.reply(`Import ${import_name} with ID ${import_id} has been added to the vehicles.lua file.`);
+                await addImportToDatabase(import_id, import_name)
+                interaction.reply(`Import ${import_name} with ID ${import_id} has been added to the vehicles.lua file and database.`);
         } catch (error) {
             console.error('Error in execute function:', error);
             interaction.reply('An error occurred while processing the command.');

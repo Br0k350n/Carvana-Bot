@@ -725,10 +725,7 @@ local Vehicles = {
     { model = 'formula',       name = 'PR4',                           brand = 'Progen',          price = 100000,  category = 'openwheel',      type = 'automobile', shop = 'none' },
     --Imports
 
-	{ model = 'Mega Tank',name = 'Megatank',brand = 'big brother', price = 0,  category = 'tank', type = 'tank', shop = 'none' },
-	{ model = 'Ferrari',name = 'Ferrari',brand = 'ford', price = 0,  category = 'import', type = 'import', shop = 'none' },
-	{ model = 'Mustang',name = 'Mustang',brand = 'ford', price = 0,  category = 'import', type = 'import', shop = 'none' },
-	{ model = 'Mustang',name = 'Mustang',brand = 'ford', price = 0,  category = 'import', type = 'import', shop = 'none' },
+	{ model = 'megatank',name = 'mega tank',brand = 'ford', price = 0,  category = 'automobile', type = 'automobile', shop = 'none' },
 	
     
 
