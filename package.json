@@ -5,8 +5,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "tsc",
-    "package": "pkg index.js --output carvana"
+    "build": "tsc && node ./dist/deploy-commands.js"
   },
   "keywords": [],
   "author": "",
