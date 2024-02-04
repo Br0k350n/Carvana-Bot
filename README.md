@@ -1,29 +1,34 @@
 # Carvana Discord Bot
-**Credits: Eugene & Edward Conroy with E<sup>2</sup> Devlopment (Maldo & Br0k350n)**
-
 
 ## Overview
 
 The Carvana Discord bot is designed to facilitate the management of imported vehicles in your FiveM Discord server. It integrates with Google Sheets for data storage and retrieval, as well as MySQL for database operations related to imported vehicles.
 
+### Credits
+- Eugene & Edward Conroy with E<sup>2</sup> Development (Maldo & Br0k350n)
+
 ## Features
 
-- **Import Vehicle Command:**
-  - Allows authorized users to issue import orders for players.
-  - Generates unique license plates for imported vehicles, or the option for a custom license plate.
-  - Verifies and validates user input, ensuring data consistency.
+### Import Vehicle Command
 
-- **Google Sheets Integration:**
-  - Stores imported vehicle data in a Google Sheet.
-  - Uses the Google Sheets API for seamless interaction with the spreadsheet.
+- Allows authorized users to issue import orders for players.
+- Generates unique license plates for imported vehicles, or the option for a custom license plate.
+- Verifies and validates user input, ensuring data consistency.
 
-- **MySQL Database:**
-  - Manages player vehicle data in a MySQL database.
-  - Ensures data persistence and accessibility.
+### Google Sheets Integration
 
-- **Discord Interaction:**
-  - Utilizes Discord.js for handling slash commands and interactions.
-  - Implements buttons for user confirmation and cancellation.
+- Stores imported vehicle data in a Google Sheet.
+- Uses the Google Sheets API for seamless interaction with the spreadsheet.
+
+### MySQL Database
+
+- Manages player vehicle data in a MySQL database.
+- Ensures data persistence and accessibility.
+
+### Discord Interaction
+
+- Utilizes Discord.js for handling slash commands and interactions.
+- Implements buttons for user confirmation and cancellation.
 
 ## Prerequisites
 
@@ -36,9 +41,9 @@ Before running the bot, ensure you have the following:
 - Google Sheets API credentials (`credentials.json`).
 - MySQL database credentials.
 - Necessary Discord and MySQL permissions for the bot.
-- Make sure your googlesheet looks just like [this](https://docs.google.com/spreadsheets/d/109znreK_uf8wyWw8QslsLin__uYj__d_3E3bWB9Kl00/edit?usp=sharing)
+- Make sure your Google Sheet looks just like [this](https://docs.google.com/spreadsheets/d/109znreK_uf8wyWw8QslsLin__uYj__d_3E3bWB9Kl00/edit?usp=sharing)
 
-Recommended: Nodemon is installed globally
+**Recommended:** Nodemon is installed globally
 
   ```bash
   npm install -g nodemon
@@ -58,7 +63,8 @@ Recommended: Nodemon is installed globally
     ```bash
     npm i
     ```
-3. rename your .env1 file to .env and fill out all of the requirements. If you're having touble, refer to this [in-depth written tutorial](https://dev.to/ku6ryo/google-sheets-api-in-typescript-setup-and-hello-world-10oh) to understand what values are needed.
+3. rename your .env1 file to .env and fill out all of the requirements. If you're having touble, refer to this [in-depth written tutorial](https://dev.to/ku6ryo/google-sheets-api-in-typescript-setup-and-hello-world-10oh) to understand what googlesheet values are needed. You also need to run the "import_vehicles.sql" file so that you have access to a second database used for storing processed orders and any added vehicles. It's very important that the database is not renamed.
+
 4. create a "config.json" file and add the bot token, application ID, and guild id.
     ```json
       {
@@ -83,18 +89,17 @@ Start the bot (with nodemon)
     ```
 **Congratulations** You have successfully installed the Carvana Discord Bot! The commands for this bot will automatically be available to anyone with the role of "admin" or "tester".
 ## Commands
-  - **/giveimport(discord_id, cid, import_id, <cp>)**
-  - discord_id: The ID of any given Discord User (it looks like this: "1202387754470604821")
+  - **/giveimport(cid, import_id, cp?)**
     - cid: The ID given to players as they fly in to the city, commonly known in FiveM as your "lucky number".
-    - import_id: The ID of the vehicle being given.
+    - import_id: The spawnid of the vehicle being given.
     - cp(custom plate): an optional parameter for making a custom license plate.
-    - This will not only be added to the database in "players_vehicles", but will also be tracked in your googlesheet.
+    - This will not only be added to the database in "players_vehicles", but will also be tracked in your googlesheet. On top of this, the processed orders will go into the "processed_orders" table of the "imported_vehicles" database.
 
-- **/addimport(import_name, import_id) (coming soon)**
-  - add your import to a googlesheet
-  - add your import to a database
-  - import_name: name of the new vehicle
-  - import_id: id used to spawn the vehicle
+- **/addimport(import_id, import_name, import_make, import_cat)**
+  - import_id: The spawnid you set for the new vehicle.
+  - import_name: The name you set for the new vehicle.
+  - import_make: The "brand" of your new vehicle.
+  - This new vehicle will be added into the "vehicles.lua" as well as the "vehicles" table in the "imported_vehicles" database.
 
 ## Thank You For Reading!
     
