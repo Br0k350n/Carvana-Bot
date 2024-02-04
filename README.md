@@ -1,5 +1,5 @@
 # Carvana Discord Bot
-**Credits: Maldo & Br0k350n**
+**Credits: Eugene & Edward Conroy with E<sup>2</sup> Devlopment (Maldo & Br0k350n)**
 
 
 ## Overview
