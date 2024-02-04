@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, GatewayIntentBits, Client, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType } from 'discord.js';
+import { SlashCommandBuilder, GatewayIntentBits, Client, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} from 'discord.js';
 import {google, sheets_v4 } from 'googleapis';
 import * as mysql from 'mysql2/promise';
 import { token } from '../../../dist/config.json';
@@ -205,36 +205,42 @@ module.exports = {
             }
 
 
-            const confirmationEmbed = {
-                color: 0x0099FF,
-                title: 'Confirm Import Order',
-                description: `Do you want to confirm the import order for ${idValue} with license plate ${generatedPlates}?`,
-                fields: [
+            const confirmationEmbed = new EmbedBuilder() 
+                .setColor(0x0099FF)
+                .setTitle('Confirm Import Order')
+                .setDescription(`Do you want to confirm the import order for ${idValue} with license plate ${generatedPlates}?`)
+                .addFields(
                     { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
                     { name: 'Citizen Name: ', value: foundName || 'N/A' },
                     { name: 'License Plate: ', value: generatedPlates || 'N/A' },
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
                     { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
-                ],
-            };
-            const confirmed = {
-                color: 0x0099FF,
-                title: 'Congratulations!',
-                description: `Successfully issued import order to ${idValue} with license plate ${generatedPlates}.`,
-                fields: [
+                )
+                .setImage(`https://cdn0.iconfinder.com/data/icons/cars-c/512/Car1-1024.png`);
+            const confirmed = new EmbedBuilder()
+                .setColor('#57F287')
+                .setTitle('Congratulations!')
+                .setDescription(`Successfully issued import order to ${idValue} with license plate ${generatedPlates}.`)
+                .addFields(
                     { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
                     { name: 'Citizen Name: ', value: foundName || 'N/A' },
                     { name: 'License Plate: ', value: generatedPlates || 'N/A' },
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
                     { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
-                ],
-            };
-            const cancelled = {
-                color: 0x0099FF,
-                title: 'Action Incomplete',
-                description: `Action has been cancelled`
-            };
-
+                )
+                .setImage(`https://cdn0.iconfinder.com/data/icons/cars-c/512/Car1-1024.png`);
+            const cancelled = new EmbedBuilder() 
+                .setColor('#E67E22')
+                .setTitle('Action Incomplete')
+                .setDescription(`Action has been cancelled`)
+                .addFields(
+                    { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
+                    { name: 'Citizen Name: ', value: foundName || 'N/A' },
+                    { name: 'License Plate: ', value: generatedPlates || 'N/A' },
+                    { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
+                    { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
+                )
+                .setImage(`https://cdn0.iconfinder.com/data/icons/cars-c/512/Car1-1024.png`);
             const confirm: ButtonBuilder = new ButtonBuilder()
 			    .setCustomId('confirm')
 			    .setLabel('Confirm Order')
