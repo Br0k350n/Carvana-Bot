@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, Client, GatewayIntentBits, ButtonBuilder, ButtonStyle } from 'discord.js';
 import * as  mysql from 'mysql2/promise';
 import * as fs from 'fs';
-
+require('dotenv').config();
 // Create a Discord client
 const client = new Client({
     intents: [GatewayIntentBits.Guilds],
@@ -40,11 +40,12 @@ async function addImportToVehicleLua(import_id: string, import_name: string, imp
     let impData = "{ model = '%s',name = '%s',brand = '%s', price = 0,  category = '%s', type = '%s', shop = 'none' },";
 
     let exportVehicleData = formatString(impData, import_id, import_name, import_make,import_cat,import_cat);
-
-    console.log(exportVehicleData);
+    let vehiclesLua = `${process.env.vehicleLuaPath}vehicles.lua`;
+    console.log('This is the path to vehicles.lua: ', vehiclesLua)
 
     try {
-        let fileContent = fs.readFileSync('./vehicles.lua', 'utf-8').toString();
+        let fileContent = fs.readFileSync(vehiclesLua, 'utf-8').toString();
+        console.log('This is the file content', fileContent)
 
         const importIndex = fileContent.indexOf('--Imports');
 
@@ -54,7 +55,7 @@ async function addImportToVehicleLua(import_id: string, import_name: string, imp
                 fileContent.slice(0, importIndex + '--Imports'.length + (isNewlineAfterComment ? 1 : 0)) +
                 `\n\t${exportVehicleData}` +
                 fileContent.slice(importIndex + '--Imports'.length + (isNewlineAfterComment ? 1 : 0));
-            fs.writeFileSync('./vehicles.lua', fileContent);
+            fs.writeFileSync(vehiclesLua, fileContent);
             // fs.writeFileSync('./vehicles.lua', exportVehicleData);
             console.log(`Import ${import_name} with ID ${import_id} added to the vehicles.lua file.`);
         }

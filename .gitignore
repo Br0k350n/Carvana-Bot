@@ -5,3 +5,4 @@ dist
 carvana.exe
 Credentials.json
 dist/commands/utility
+vehicles.lua
