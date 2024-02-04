@@ -79,7 +79,7 @@ async function generatePlateNumbers(interaction, customPlate?: string) {
             await interaction.reply(`Custom plate too long!`);
             return null;
         }
-        if (8 >= customPlate.length) {
+        if (customPlate.length < 8 ) {
             await interaction.reply(`Custom plate too short!`);
             return null;
         }
@@ -162,14 +162,10 @@ module.exports = {
             const query = 'SELECT * FROM players WHERE cid = ?';
             const [rows] = await dbPool.execute(query, [idValue]);
             const import_query = 'SELECT * FROM player_vehicles WHERE vehicle = ?'
-            const [importRows] = await dbPool.execute(import_query, [importId]);
+            // const [importRows] = await dbPool.execute(import_query, [importId]);
 
             if (!Array.isArray(rows) || rows.length === 0) {
                 interaction.reply(`The ID ${idValue} is not in the database.`);
-                return;
-            }
-            if (!Array.isArray(importRows) || importRows.length === 0) {
-                interaction.reply(`The ID ${importId} is not in the database.`);
                 return;
             }
 
@@ -177,17 +173,17 @@ module.exports = {
             const foundcitizenId = (rows[0] as { citizenid: string }).citizenid;
             const citizenLicense = (rows[0] as { license: string }).license;
             const foundName = (rows[0] as { name: string }).name;
-            const foundImportID = (importRows[0] as { vehicle: string }).vehicle;
-            let vehicleName = (importRows[0] as { vehicle: string }).vehicle;
+            let vehicleName = importId;
             if (foundcid !== idValue) {
                 interaction.reply(`The ID ${idValue} is not associated with any citizen.`);
                 return;
             }
 
-            if (String(foundImportID) !== String(importId)) {
-                interaction.reply(`The ID ${foundImportID} is not associated with any imported vehicle, please try again.`);
-                return;
-            }
+            // if (String(foundImportID) !== String(importId)) {
+            //     interaction.reply(`The ID ${foundImportID} is not associated with any imported vehicle, please try again.`);
+            //     return;
+            // }
+
             generatedPlates = await generatePlateNumbers(interaction, license_plate);
 
             if (generatedPlates === null) {
