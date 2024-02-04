@@ -77,6 +77,7 @@ Before running the bot, ensure you have the following:
    ```bash
    npm run build
    ```
+    (Remember to use CTRL+C to exit once you get the message that the two commands have been reloaded successfully.)
 6. You should see a new folder called "dist". Move your "config.json" file into this folder, but be careful not to put it in "commands" or anywhere else.
 7. Move your prevously installed credentials file into the root directory.
 8. Start the bot
