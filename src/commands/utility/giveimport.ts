@@ -326,8 +326,13 @@ module.exports = {
 
             }
         } catch (error) {
-            console.error(`Error checking database or generating import: `, error);
-            interaction.reply(`Error ${error}`)
+            if (error.code === 'InteractionCollectorError') {
+                // Handle inactivity timeout
+                await interaction.followUp({ content: 'Confirmation not received within 1 minute, action cancelled', components: [] });
+            } else {
+                // Handle other errors
+                console.error('Error during interaction:', error);
+            }
         }
     },
 };
