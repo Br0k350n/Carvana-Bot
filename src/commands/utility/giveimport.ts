@@ -75,11 +75,11 @@ async function generatePlateNumbers(interaction, customPlate?: string) {
             return null;
         }
 
-        if (customPlate.length >= 8) {
+        if (customPlate.length >= 9) {
             await interaction.reply(`Custom plate too long!`);
             return null;
         }
-        if (5 >= customPlate.length) {
+        if (8 >= customPlate.length) {
             await interaction.reply(`Custom plate too short!`);
             return null;
         }
@@ -92,7 +92,7 @@ async function generatePlateNumbers(interaction, customPlate?: string) {
     let isPlateExists
 
     for (let i = 0; i < 10; i++) {
-        plateID = Array.from({ length: 6 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
+        plateID = Array.from({ length: 8 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
         isPlateExists = await checkPlateExistence(plateID);
         if (!isPlateExists) {
             break;
@@ -161,7 +161,7 @@ module.exports = {
             // Check if the specified ID is in the database
             const query = 'SELECT * FROM players WHERE cid = ?';
             const [rows] = await dbPool.execute(query, [idValue]);
-            const import_query = 'SELECT * FROM player_vehicles WHERE id = ?'
+            const import_query = 'SELECT * FROM player_vehicles WHERE vehicle = ?'
             const [importRows] = await dbPool.execute(import_query, [importId]);
 
             if (!Array.isArray(rows) || rows.length === 0) {
@@ -177,7 +177,7 @@ module.exports = {
             const foundcitizenId = (rows[0] as { citizenid: string }).citizenid;
             const citizenLicense = (rows[0] as { license: string }).license;
             const foundName = (rows[0] as { name: string }).name;
-            const foundImportID = (importRows[0] as { id: string }).id;
+            const foundImportID = (importRows[0] as { vehicle: string }).vehicle;
             let vehicleName = (importRows[0] as { vehicle: string }).vehicle;
             if (foundcid !== idValue) {
                 interaction.reply(`The ID ${idValue} is not associated with any citizen.`);
