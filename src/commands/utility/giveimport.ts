@@ -123,6 +123,9 @@ async function addPlateToDatabase(name, discordUser, license, citizenid, vehicle
     }
 }
 
+function capitalizeFirstLetter(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -148,7 +151,7 @@ module.exports = {
         const discordId = interaction.options.getString('discord_id');
         const discordUser = await checkDiscordUser(discordId);
         const idValue = interaction.options.getInteger('cid');
-        const importId = interaction.options.getString('import_id');
+        const importId = capitalizeFirstLetter(interaction.options.getString('import_id'));
         const isAdmin = interaction.member.roles.cache.some(role => role.name === 'admin');
         const isTester = interaction.member.roles.cache.some(role => role.name === 'tester');
         const license_plate = interaction.options.getString('cp');
