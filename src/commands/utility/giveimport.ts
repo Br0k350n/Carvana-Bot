@@ -161,8 +161,6 @@ module.exports = {
             // Check if the specified ID is in the database
             const query = 'SELECT * FROM players WHERE cid = ?';
             const [rows] = await dbPool.execute(query, [idValue]);
-            const import_query = 'SELECT * FROM player_vehicles WHERE vehicle = ?'
-            // const [importRows] = await dbPool.execute(import_query, [importId]);
 
             if (!Array.isArray(rows) || rows.length === 0) {
                 interaction.reply(`The ID ${idValue} is not in the database.`);
@@ -178,11 +176,6 @@ module.exports = {
                 interaction.reply(`The ID ${idValue} is not associated with any citizen.`);
                 return;
             }
-
-            // if (String(foundImportID) !== String(importId)) {
-            //     interaction.reply(`The ID ${foundImportID} is not associated with any imported vehicle, please try again.`);
-            //     return;
-            // }
 
             generatedPlates = await generatePlateNumbers(interaction, license_plate);
 
@@ -204,7 +197,7 @@ module.exports = {
             const confirmationEmbed = new EmbedBuilder() 
                 .setColor(0x0099FF)
                 .setTitle('Confirm Import Order')
-                .setDescription(`Do you want to confirm the import order for ${idValue} with license plate ${generatedPlates}?`)
+                .setDescription(`Do you want to confirm the import order for ${citizenLicense} with license plate ${generatedPlates}?`)
                 .addFields(
                     { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
                     { name: 'Citizen Name: ', value: foundName || 'N/A' },
@@ -216,7 +209,7 @@ module.exports = {
             const confirmed = new EmbedBuilder()
                 .setColor('#57F287')
                 .setTitle('Congratulations!')
-                .setDescription(`Successfully issued import order to ${idValue} with license plate ${generatedPlates}.`)
+                .setDescription(`Successfully issued import order to ${citizenLicense} with license plate ${generatedPlates}.`)
                 .addFields(
                     { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
                     { name: 'Citizen Name: ', value: foundName || 'N/A' },
