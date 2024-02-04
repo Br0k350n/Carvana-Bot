@@ -191,22 +191,28 @@ module.exports = {
             const [rows] = await dbPool.execute(query, [idValue]);
             const [importRows] = await dbPool2.execute(importQuery, [importId]);
 
-
+            const rowData = rows[0] as { cid?: string };
             const importData = importRows[0] as { spawnid?: string; vehicle?: string };
 
             if (!importData || !importData.spawnid) {
                 interaction.reply(`No vehicle with the spawnid of "${importId}" is in the database.`);
                 return;
             }
+            if (!rowData || !rowData.cid) {
+                interaction.reply(`No citizen found with CID: ${idValue}`);
+                return;
+            }
 
             const foundImportID = importData.spawnid;
             let vehicleName = importData.vehicle;
 
-            const foundcid = (rows[0] as { cid: string }).cid;
+            const foundcid = rowData.cid;
             const foundcitizenId = (rows[0] as { citizenid: string }).citizenid;
             const citizenLicense = (rows[0] as { license: string }).license;
             const foundName = (rows[0] as { name: string }).name;
 
+
+            
             if (foundImportID !== importId.toLowerCase()) {
                 interaction.reply(`The ID ${foundImportID} is not associated with any imported vehicle, please try again.`);
                 return;
