@@ -1,4 +1,6 @@
 # Carvana Discord Bot
+**Credits: Maldo & Br0k350n**
+
 
 ## Overview
 
