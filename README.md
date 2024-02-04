@@ -31,8 +31,8 @@ Before running the bot, ensure you have the following:
 
 - Node.js installed on your machine.
 - Discord bot token obtained from the [Discord Developer Portal](https://discord.com/developers/applications).
-- Discord bot client ID obtained from the [Discord Developer Portal](https://discord.com/developers/applications).
 - Discord bot application ID obtained from the [Discord Developer Portal](https://discord.com/developers/applications).
+- Discord bot guild ID obtained from your [Server ID](https://www.alphr.com/discord-find-server-id/).
 - Google Sheets API credentials (`credentials.json`).
 - MySQL database credentials.
 - Necessary Discord and MySQL permissions for the bot.
@@ -58,12 +58,12 @@ Recommended: Nodemon is installed globally
     npm i
     ```
 3. rename your .env1 file to .env and fill out all of the requirements. If you're having touble, refer to this [in-depth written tutorial](https://dev.to/ku6ryo/google-sheets-api-in-typescript-setup-and-hello-world-10oh) to understand what values are needed.
-4. create a "config.json" file and add the bot token, client ID, and application id.
+4. create a "config.json" file and add the bot token, application ID, and guild id.
     ```json
       {
           "token": "YOUR_DISCORD_BOT_TOKEN_HERE",
-          "clientId": "YOUR_DISCORD_BOT_CLIENT_ID",
-          "guildId": "YOUR_DISCORD_BOT_APPLICATION_ID"
+          "clientId": "YOUR_DISCORD_BOT_APPLICATION_ID",
+          "guildId": "YOUR_DISCORD_BOT_GUILD_ID"
       }
     ```
 5. Build the bot
