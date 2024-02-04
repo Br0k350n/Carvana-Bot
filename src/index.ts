@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as mysql from 'mysql2';
 import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
 import { token } from '../dist/config.json';
 require('dotenv').config();

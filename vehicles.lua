@@ -725,7 +725,7 @@ local Vehicles = {
     { model = 'formula',       name = 'PR4',                           brand = 'Progen',          price = 100000,  category = 'openwheel',      type = 'automobile', shop = 'none' },
     --Imports
 
-	{ model = 'megatank',name = 'mega tank',brand = 'ford', price = 0,  category = 'automobile', type = 'automobile', shop = 'none' },
+	
 	
     
 

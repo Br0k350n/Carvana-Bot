@@ -140,7 +140,6 @@ async function processOrder(name: string, license: string, citizenid: string, ve
     const currentDate = new Date().toISOString().slice(0, 10);
     const currentTime = new Date().toISOString().slice(11, 19);
     
-    console.log('Function Inputs:', name, license, citizenid, vehicle, spawnid, plateID);
     try {
         const result = await dbPool2.execute('INSERT INTO processed_orders (name, license, citizenid, vehicle, spawnid, plate, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',[name, license, citizenid, vehicle, spawnid, plateID, currentDate, currentTime]);
         console.log('insertion result: ', result)
@@ -149,10 +148,6 @@ async function processOrder(name: string, license: string, citizenid: string, ve
     }
 
 
-}
-
-function capitalizeFirstLetter(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
 module.exports = {
@@ -188,21 +183,35 @@ module.exports = {
         }
 
         try {
+
             let generatedPlates;
             // Check if the specified ID is in the database
             const query = 'SELECT * FROM players WHERE cid = ?';
+            const importQuery = 'SELECT * FROM vehicles WHERE spawnid = ?';
             const [rows] = await dbPool.execute(query, [idValue]);
+            const [importRows] = await dbPool2.execute(importQuery, [importId]);
 
-            if (!Array.isArray(rows) || rows.length === 0) {
-                interaction.reply(`The ID ${idValue} is not in the database.`);
+
+            const importData = importRows[0] as { spawnid?: string; vehicle?: string };
+
+            if (!importData || !importData.spawnid) {
+                interaction.reply(`No vehicle with the spawnid of "${importId}" is in the database.`);
                 return;
             }
+
+            const foundImportID = importData.spawnid;
+            let vehicleName = importData.vehicle;
 
             const foundcid = (rows[0] as { cid: string }).cid;
             const foundcitizenId = (rows[0] as { citizenid: string }).citizenid;
             const citizenLicense = (rows[0] as { license: string }).license;
             const foundName = (rows[0] as { name: string }).name;
-            let vehicleName = importId;
+
+            if (foundImportID !== importId.toLowerCase()) {
+                interaction.reply(`The ID ${foundImportID} is not associated with any imported vehicle, please try again.`);
+                return;
+            }
+
             if (foundcid !== idValue) {
                 interaction.reply(`The ID ${idValue} is not associated with any citizen.`);
                 return;
@@ -219,6 +228,8 @@ module.exports = {
                 return;
             }
 
+
+
             // if (!discordUser) {
 
             //     return interaction.reply('Invalid Discord user ID.');
@@ -228,7 +239,7 @@ module.exports = {
             const confirmationEmbed = new EmbedBuilder() 
                 .setColor(0x0099FF)
                 .setTitle('Confirm Import Order')
-                .setDescription(`Do you want to confirm the import order for ${citizenLicense} with license plate ${generatedPlates}?`)
+                .setDescription(`Do you want to confirm the import order for ${foundName} with license plate ${generatedPlates}?`)
                 .addFields(
                     // { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
                     { name: 'Citizen Name: ', value: foundName || 'N/A' },
@@ -240,7 +251,7 @@ module.exports = {
             const confirmed = new EmbedBuilder()
                 .setColor('#57F287')
                 .setTitle('Congratulations!')
-                .setDescription(`Successfully issued import order to ${citizenLicense} with license plate ${generatedPlates}.`)
+                .setDescription(`Successfully issued import order to ${foundName} with license plate ${generatedPlates}.`)
                 .addFields(
                     // { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
                     { name: 'Citizen Name: ', value: foundName || 'N/A' },
