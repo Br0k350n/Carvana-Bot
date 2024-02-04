@@ -1,0 +1,9 @@
+HOST=server host goes here
+USER= Username for server
+PASSWORD= Password
+DBNAME= Name of database
+SERVICE_ACCOUNT_EMAIL=Google sheets api service account email
+SERVICE_ACCOUNT_PRIVATE_KEY = Private Key
+SHEET_ID=Google sheet id
+
+# Change file name to .env

@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, GatewayIntentBits, Client, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType } from 'discord.js';
 import {google, sheets_v4 } from 'googleapis';
 import * as mysql from 'mysql2/promise';
+import { token } from '../../../dist/config.json';
 require('dotenv').config();
 import * as fs from 'fs';
 
@@ -14,19 +15,32 @@ const auth = new google.auth.GoogleAuth({
 
 
 const client = new Client({
+    
     intents: [
         GatewayIntentBits.Guilds,
-        // Add other necessary intents here
+        GatewayIntentBits.GuildMembers,
     ],
+    
 });
+client.login(token);
 
-async function addDataToSheet(name: string, license: string, citizenID: string, vehicle: string, plateID: string) {
+const checkDiscordUser = async (userId: string) => {
+    try {
+      const user = await client.users.fetch(userId);
+      return user;
+    } catch (error) {
+      console.error('Error fetching user:', error.message);
+      return null;
+    }
+  };
+  
+async function addDataToSheet(name: string, discordUser: string, license: string, citizenid: string, vehicle: string, plateID: string) {
     const range = 'orders'; 
     const sheet = google.sheets('v4');
     const currentDate = new Date().toISOString().slice(0, 10);
     const currentTime = new Date().toISOString().slice(11, 19);
 
-    const values = [[name, license, citizenID, vehicle, plateID, currentDate, currentTime]];
+    const values = [[name, discordUser, license, citizenid, vehicle, plateID, currentDate, currentTime]];
     await sheet.spreadsheets.values.append({
         spreadsheetId,
         auth,
@@ -96,14 +110,14 @@ async function checkPlateExistence(plateID) {
     return rows[0].count > 0;
 }
 
-async function addPlateToDatabase(name, license, citizenID, vehicle, plateID) {
-    if (citizenID === undefined || plateID === undefined) {
+async function addPlateToDatabase(name, discordUser, license, citizenid, vehicle, plateID) {
+    if (citizenid === undefined || plateID === undefined) {
         console.error('Citizen ID or PlateID is undefined.');
         return;  // You may choose to handle this differently based on your requirements
     }
     try {
-        await dbPool.execute('INSERT INTO player_vehicles (citizenid, vehicle, plate) VALUES (?, ?, ?)', [citizenID, vehicle, plateID]);
-        await addDataToSheet(name, license, citizenID, vehicle, plateID);
+        await dbPool.execute('INSERT INTO player_vehicles (citizenid, vehicle, plate) VALUES (?, ?, ?)', [citizenid, vehicle, plateID]);
+        await addDataToSheet(name, discordUser, license, citizenid, vehicle, plateID);
     } catch (error) {
         console.error('Error executing SQL query:', error);
     }
@@ -115,19 +129,25 @@ module.exports = {
         .setName('giveimport')
         .setDescription('Give a player an imported vehicle.')
         .addStringOption(option =>
-            option.setName('import_id')
-                .setDescription('Enter the import ID.')
-                .setRequired(true))
-        .addStringOption(option =>
-                option.setName('citizenid')
+            option.setName('discord_id')
+                    .setDescription(`Enter the citizen's Discord ID.`)
+                    .setRequired(true))
+        .addIntegerOption(option =>
+                option.setName('cid')
                     .setDescription(`Enter the citizen's "Lucky Numbers". `)
                     .setRequired(true))
         .addStringOption(option =>
-                    option.setName('cp')
-                        .setDescription('Enter a custom license plate.')
-                        .setRequired(false)),
+                option.setName('import_id')
+                    .setDescription('Enter the import ID.')
+                    .setRequired(true))
+        .addStringOption(option =>
+                option.setName('cp')
+                    .setDescription('Enter a custom license plate.')
+                    .setRequired(false)),
     async execute(interaction) {
-        const idValue = interaction.options.getString('citizenid');
+        const discordId = interaction.options.getString('discord_id');
+        const discordUser = await checkDiscordUser(discordId);
+        const idValue = interaction.options.getInteger('cid');
         const importId = interaction.options.getString('import_id');
         const isAdmin = interaction.member.roles.cache.some(role => role.name === 'admin');
         const isTester = interaction.member.roles.cache.some(role => role.name === 'tester');
@@ -139,7 +159,7 @@ module.exports = {
         try {
             let generatedPlates;
             // Check if the specified ID is in the database
-            const query = 'SELECT * FROM players WHERE citizenid = ?';
+            const query = 'SELECT * FROM players WHERE cid = ?';
             const [rows] = await dbPool.execute(query, [idValue]);
             const import_query = 'SELECT * FROM player_vehicles WHERE id = ?'
             const [importRows] = await dbPool.execute(import_query, [importId]);
@@ -153,12 +173,13 @@ module.exports = {
                 return;
             }
 
+            const foundcid = (rows[0] as { cid: string }).cid;
             const foundcitizenId = (rows[0] as { citizenid: string }).citizenid;
             const citizenLicense = (rows[0] as { license: string }).license;
             const foundName = (rows[0] as { name: string }).name;
             const foundImportID = (importRows[0] as { id: string }).id;
             let vehicleName = (importRows[0] as { vehicle: string }).vehicle;
-            if (foundcitizenId !== idValue) {
+            if (foundcid !== idValue) {
                 interaction.reply(`The ID ${idValue} is not associated with any citizen.`);
                 return;
             }
@@ -178,14 +199,18 @@ module.exports = {
                 return;
             }
 
-            
+            if (!discordUser) {
 
-            // Creating a confirmation embed with buttons
+                return interaction.reply('Invalid Discord user ID.');
+            }
+
+
             const confirmationEmbed = {
                 color: 0x0099FF,
                 title: 'Confirm Import Order',
                 description: `Do you want to confirm the import order for ${idValue} with license plate ${generatedPlates}?`,
                 fields: [
+                    { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
                     { name: 'Citizen Name: ', value: foundName || 'N/A' },
                     { name: 'License Plate: ', value: generatedPlates || 'N/A' },
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
@@ -197,6 +222,7 @@ module.exports = {
                 title: 'Congratulations!',
                 description: `Successfully issued import order to ${idValue} with license plate ${generatedPlates}.`,
                 fields: [
+                    { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
                     { name: 'Citizen Name: ', value: foundName || 'N/A' },
                     { name: 'License Plate: ', value: generatedPlates || 'N/A' },
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
@@ -209,7 +235,6 @@ module.exports = {
                 description: `Action has been cancelled`
             };
 
-            // Create a row of buttons
             const confirm: ButtonBuilder = new ButtonBuilder()
 			    .setCustomId('confirm')
 			    .setLabel('Confirm Order')
@@ -222,8 +247,6 @@ module.exports = {
 
 		    const row: ActionRowBuilder = new ActionRowBuilder()
 			    .addComponents(cancel, confirm);
-            
-            // Send the confirmation embed with attached buttons
             const response = await interaction.reply({
                 content: 'Please confirm the import order:',
                 embeds: [confirmationEmbed],
@@ -235,7 +258,7 @@ module.exports = {
             confirmation.deferUpdate();
             async function handleConfirmation(interaction) {
                 if (generatedPlates !== null) {
-                    await addPlateToDatabase(foundName, citizenLicense, foundcitizenId, vehicleName, generatedPlates);
+                    await addPlateToDatabase(foundName, discordUser.tag, citizenLicense, foundcitizenId, vehicleName, generatedPlates);
                     await interaction.channel.send({ embeds: [confirmed] })
                 }
             }
