@@ -4,8 +4,9 @@
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "build": "tsc && node ./dist/deploy-commands.js"
+    "compile": "tsc",
+    "deploy": "node ./dist/deploy-commands.js",
+    "build": "(npm run compile && npm run deploy) || npm run deploy"
   },
   "keywords": [],
   "author": "",

@@ -64,6 +64,17 @@ const dbPool = mysql.createPool({
     queueLimit: 0
 });
 
+const vehiclePool = mysql.createPool({
+    host: process.env.HOST,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.VDBNAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+
 async function generatePlateNumbers(interaction, customPlate?: string) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
@@ -118,9 +129,26 @@ async function addPlateToDatabase(name, discordUser, license, citizenid, vehicle
     try {
         await dbPool.execute('INSERT INTO player_vehicles (citizenid, vehicle, plate) VALUES (?, ?, ?)', [citizenid, vehicle, plateID]);
         await addDataToSheet(name, discordUser, license, citizenid, vehicle, plateID);
+        await processOrder(name, license, citizenid, vehicle, plateID);
     } catch (error) {
         console.error('Error executing SQL query:', error);
     }
+}
+
+async function processOrder(name: string, license: string, citizenid: string, vehicle: string, plateID: string) {
+    const order_data: Array<string> = [name, license, citizenid, vehicle, plateID];
+
+    if (citizenid === undefined || plateID === undefined) {
+        console.error('Citizen ID or PlateID is undefined.');
+        return;  // You may choose to handle this differently based on your requirements
+    }
+    try {
+        await vehiclePool.execute('INSERT INTO processed_orders (name, license, citizenid, vehicle, spawnid, plate, date, time) VALUES (?, ?, ?, ?)', order_data);
+    } catch (error) {
+        console.error('Error executing SQL query:', error);
+    }
+
+
 }
 
 function capitalizeFirstLetter(str: string): string {
