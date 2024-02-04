@@ -36,6 +36,10 @@ Before running the bot, ensure you have the following:
 - Google Sheets API credentials (`credentials.json`).
 - MySQL database credentials.
 - Necessary Discord and MySQL permissions for the bot.
+- Make sure your googlesheet looks just like [this](https://docs.google.com/spreadsheets/d/109znreK_uf8wyWw8QslsLin__uYj__d_3E3bWB9Kl00/edit?usp=sharing):
+  
+  ![Screenshot](https://drive.google.com/file/d/1qQVx04D4o2bzIHdJSUf2j3rqOWsCRffV/view?usp=drive_link)
+
 
 Recommended: Nodemon is installed globally
 
