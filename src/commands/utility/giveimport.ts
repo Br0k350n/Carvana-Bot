@@ -216,7 +216,7 @@ module.exports = {
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
                     { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
                 )
-                .setImage(`https://cdn0.iconfinder.com/data/icons/cars-c/512/Car1-1024.png`);
+                .setThumbnail(`https://cdn0.iconfinder.com/data/icons/cars-c/512/Car1-1024.png`);
             const confirmed = new EmbedBuilder()
                 .setColor('#57F287')
                 .setTitle('Congratulations!')
@@ -228,7 +228,7 @@ module.exports = {
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
                     { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
                 )
-                .setImage(`https://cdn0.iconfinder.com/data/icons/cars-c/512/Car1-1024.png`);
+                .setThumbnail(`https://cdn0.iconfinder.com/data/icons/cars-c/512/Car1-1024.png`);
             const cancelled = new EmbedBuilder() 
                 .setColor('#E67E22')
                 .setTitle('Action Incomplete')
@@ -240,7 +240,7 @@ module.exports = {
                     { name: 'Citizen ID: ', value: foundcitizenId || 'N/A' },
                     { name: 'Citizen Game License: ', value: citizenLicense || 'N/A' },
                 )
-                .setImage(`https://cdn0.iconfinder.com/data/icons/cars-c/512/Car1-1024.png`);
+                .setThumbnail(`https://cdn0.iconfinder.com/data/icons/cars-c/512/Car1-1024.png`);
             const confirm: ButtonBuilder = new ButtonBuilder()
 			    .setCustomId('confirm')
 			    .setLabel('Confirm Order')
