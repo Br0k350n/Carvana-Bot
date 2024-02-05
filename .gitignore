@@ -6,3 +6,5 @@ carvana.exe
 Credentials.json
 dist/commands/utility
 vehicles.lua
+MariaDB.sql
+logban.ts
