@@ -7,3 +7,4 @@ Credentials.json
 dist/commands/utility
 vehicles.lua
 MariaDB.sql
+qb-core-main
