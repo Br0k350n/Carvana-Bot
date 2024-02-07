@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, Client, GatewayIntentBits, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, Client, GatewayIntentBits } from 'discord.js';
 import * as  mysql from 'mysql2/promise';
 import * as fs from 'fs';
 require('dotenv').config();

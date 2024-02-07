@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, GatewayIntentBits, Client, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} from 'discord.js';
-import {google, sheets_v4 } from 'googleapis';
+import { google } from 'googleapis';
 import * as mysql from 'mysql2/promise';
 import { token } from '../../../dist/config.json';
 require('dotenv').config();
