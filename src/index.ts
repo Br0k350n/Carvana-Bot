@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
+import { Client, Collection, Events, GatewayIntentBits, PresenceStatusData, ActivityType } from 'discord.js';
 import { token } from '../dist/config.json';
 require('dotenv').config();
 
@@ -10,8 +10,27 @@ declare module 'discord.js' {
     }
 }
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
+function updatePresence() {
+    client.user.setPresence({
+        activities: [{ name: `${client.guilds.cache.map((guild) => guild.memberCount).reduce((p, c) => p + c)} users`, type: ActivityType.Watching }],
+        status: 'online' as PresenceStatusData, 
+    });
+}
+
+
+client.once("ready", () => {
+    updatePresence(); 
+});
+
+client.on("guildMemberAdd", async () => {
+    updatePresence();
+});
+
+client.on("guildMemberRemove", async () => {
+    updatePresence();
+});
 
 client.commands = new Collection<string, any>();
 

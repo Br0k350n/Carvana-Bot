@@ -8,3 +8,4 @@ dist/commands/utility
 vehicles.lua
 MariaDB.sql
 qb-core-main
+lua_script
