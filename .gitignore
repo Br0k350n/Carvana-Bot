@@ -4,7 +4,9 @@ Credentials.zip
 dist
 carvana.exe
 Credentials.json
-dist/commands/utility
+dist/*
+!dist/
+!config_example.json
 vehicles.lua
 MariaDB.sql
 qb-core-main

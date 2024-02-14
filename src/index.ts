@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Client, Collection, Events, GatewayIntentBits, PresenceStatusData, ActivityType } from 'discord.js';
-import { token } from '../dist/config.json';
 require('dotenv').config();
-
+const botConfig = JSON.parse(process.env.BOT_CONFIG);
+const token = botConfig.token;
 declare module 'discord.js' {
     interface Client {
         commands: Collection<string, any>;

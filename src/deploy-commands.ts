@@ -3,6 +3,7 @@ import { clientId, guildId, token } from '../dist/config.json';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+
 const commands: any[] = [];
 // Grab all the command folders from the commands directory you created earlier
 const foldersPath = path.join(__dirname, 'commands');

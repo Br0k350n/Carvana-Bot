@@ -36,7 +36,7 @@ Before running the bot, ensure you have the following:
 
 - Node.js installed on your machine.
 - Discord bot token obtained from the [Discord Developer Portal](https://discord.com/developers/applications).
-- Discord bot application ID obtained from the [Discord Developer Portal](https://discord.com/developers/applications).
+- Discord bot client ID obtained from the [Discord Developer Portal](https://discord.com/developers/applications).
 - Discord bot guild ID obtained from your [Server ID](https://www.alphr.com/discord-find-server-id/).
 - Google Sheets API credentials (`credentials.json`).
 - MySQL database credentials.
@@ -67,11 +67,11 @@ Before running the bot, ensure you have the following:
 
 **[IMPORTANT]** **You should replace the ```vehicleLuaPath``` in your .env with the ```ABSOLUTE PATH``` to your ```vehicles.lua``` file.**
 
-4. create a ```config.json``` file and add the bot token, application ID, and guild id.
+4. Rename the ```example_config.json``` file to ```config.json``` and add the bot token, cleint ID (also called application ID), and guild id. 
     ```json
       {
           "token": "YOUR_DISCORD_BOT_TOKEN_HERE",
-          "clientId": "YOUR_DISCORD_BOT_APPLICATION_ID",
+          "clientId": "YOUR_DISCORD_BOT_CLIENT_ID",
           "guildId": "YOUR_DISCORD_BOT_GUILD_ID"
       }
     ```
@@ -83,9 +83,8 @@ Before running the bot, ensure you have the following:
    npm run build
    ```
     (Remember to use ```CTRL+C``` to exit once you get the message that the two commands have been reloaded successfully.)
-7. You should see a new folder called ```dist```. Move your ```config.json``` file into this folder, but be careful not to put it in ```commands``` or any other directory.
-8. Move your prevously installed credentials file into the root directory.
-9. Start the bot
+7. Move your prevously installed credentials file into the root directory.
+8. Start the bot
    ```bash
    node .
    ```
@@ -93,6 +92,7 @@ Before running the bot, ensure you have the following:
    ```
    nodemon .
    ```
+(optional) 9. change the roles allowed to use the /giveimport and /addimport commands. go to your ```.env``` file, and in ```ALLOWED_ROLES``` change what roles you'd like to have access to these commands.
 
 **Congratulations** You have successfully installed the Carvana Discord Bot! The commands for this bot will automatically be available to anyone with the role of "admin" or "tester".
 ## Commands
