@@ -23,16 +23,6 @@ const client = new Client({
     
 });
 client.login(token);
-
-const checkDiscordUser = async (userId: string) => {
-    try {
-      const user = await client.users.fetch(userId);
-      return user;
-    } catch (error) {
-      console.error('Error fetching user:', error.message);
-      return null;
-    }
-  };
   
 async function addDataToSheet(name: string, license: string, citizenid: string, vehicle: string, plateID: string) {
     const range = 'orders'; 
@@ -73,8 +63,6 @@ const dbPool2 = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0
 });
-
-console.log('MySQL Pool Config:', dbPool2.config);
 
 async function generatePlateNumbers(interaction, customPlate?: string) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

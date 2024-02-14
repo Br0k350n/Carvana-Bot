@@ -98,6 +98,11 @@ module.exports = {
         const import_id = interaction.options.getString('import_id').toLowerCase();
         const import_make = interaction.options.getString('import_make').toLowerCase();
         const import_cat = interaction.options.getString('import_cat').toLowerCase();
+        const isAdmin = interaction.member.roles.cache.some(role => role.name === 'admin');
+        const isTester = interaction.member.roles.cache.some(role => role.name === 'tester');
+        if (!isAdmin && !isTester) {
+            return interaction.reply('You do not have the necessary role to use this command.');
+        }
 
         try {
                 await addImportToVehicleLua(import_id, import_name, import_make, import_cat);
