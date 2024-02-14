@@ -2,9 +2,9 @@
 
 ## Overview
 
-The Carvana Discord bot is designed to facilitate the management of imported vehicles in your FiveM Discord server. It integrates with Google Sheets for data storage and retrieval, as well as MySQL for database operations related to imported vehicles.
+#### The Carvana Discord bot is designed to facilitate the management of imported vehicles in your FiveM Discord server. It integrates with Google Sheets for data storage and retrieval, as well as MySQL for database operations related to imported vehicles.
 
-### Credits
+## Credits
 - Eugene & Edward Conroy with E<sup>2</sup> Development (Maldo & Br0k350n)
 
 ## Features
@@ -93,9 +93,14 @@ Before running the bot, ensure you have the following:
    ```
    nodemon .
    ```
-(optional) 9. change the roles allowed to use the /giveimport and /addimport commands. go to your ```.env``` file, and in ```ALLOWED_ROLES``` change what roles you'd like to have access to these commands. Make sure that the roles you add in the ```.env``` file are all in **lowercase**.
+9. (**optional**) change the roles allowed to use the /giveimport and /addimport commands.
+ 
+   go to your ```.env``` file, and in ```ALLOWED_ROLES``` change what roles you'd like to have access to these commands.
 
-**Congratulations** You have successfully installed the Carvana Discord Bot! The commands for this bot will automatically be available to anyone with the role of "admin" or "tester".
+   Make sure that the roles you add in the ```.env``` file are all in **lowercase**.
+
+### Congratulations 
+  #### You have successfully installed the Carvana Discord Bot! The commands for this bot will automatically be available to anyone with the role of "admin" or "tester", but you can change this in your .env file.
 ## Commands
   - **```/giveimport(cid, import_id, cp?)```**
     - ```cid```: The ID given to players as they fly in to the city, commonly known in FiveM as your "lucky number".
@@ -111,4 +116,4 @@ Before running the bot, ensure you have the following:
   - This new vehicle will be added into the "vehicles.lua" as well as the ```vehicles``` table in the ```imported_vehicles``` database.
 
 ## Thank You For Reading!
-    
+[Back to the top](https://github.com/Br0k350n/Carvana-Bot/edit/master/README.md#carvana-discord-bot)
