@@ -107,6 +107,7 @@ Before running the bot, ensure you have the following:
   - ```import_id```: The spawnid you set for the new vehicle.
   - ```import_name```: The name you set for the new vehicle.
   - ```import_make```: The "brand" of your new vehicle.
+  - ```import_cat```: The category of your new vehicle.
   - This new vehicle will be added into the "vehicles.lua" as well as the ```vehicles``` table in the ```imported_vehicles``` database.
 
 ## Thank You For Reading!
