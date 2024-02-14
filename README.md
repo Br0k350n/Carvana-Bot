@@ -93,7 +93,7 @@ Before running the bot, ensure you have the following:
    ```
    nodemon .
    ```
-(optional) 9. change the roles allowed to use the /giveimport and /addimport commands. go to your ```.env``` file, and in ```ALLOWED_ROLES``` change what roles you'd like to have access to these commands.
+(optional) 9. change the roles allowed to use the /giveimport and /addimport commands. go to your ```.env``` file, and in ```ALLOWED_ROLES``` change what roles you'd like to have access to these commands. Make sure that the roles you add in the ```.env``` file are all in **lowercase**.
 
 **Congratulations** You have successfully installed the Carvana Discord Bot! The commands for this bot will automatically be available to anyone with the role of "admin" or "tester".
 ## Commands
