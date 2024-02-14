@@ -75,6 +75,7 @@ Before running the bot, ensure you have the following:
           "guildId": "YOUR_DISCORD_BOT_GUILD_ID"
       }
     ```
+   (Note: Be sure to fill out the BOT_CONFIG .env variable with the information as well, because in future iterations of this bot the config.json file will become obsolete.)
 5. Create the ```import_vehicles``` database. You need to run the ```import_vehicles.sql``` file so that you have access to a second database used for storing processed orders and any added vehicles. 
   [**IMPORTANT**]: **It's very important that the database is not renamed.**
 
