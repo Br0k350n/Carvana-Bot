@@ -116,7 +116,7 @@ async function addPlateToDatabase(name, license, citizenid, vehicle, spawnid, pl
         return;  // You may choose to handle this differently based on your requirements
     }
     try {
-        await dbPool.execute('INSERT INTO player_vehicles (citizenid, vehicle, plate) VALUES (?, ?, ?)', [citizenid, vehicle, plateID]);
+        await dbPool.execute('INSERT INTO player_vehicles (license, citizenid, vehicle, plate) VALUES (?, ?, ?, ?)', [license, citizenid, vehicle, plateID]);
         await addDataToSheet(name, license, citizenid, vehicle, plateID);
         await processOrder(name, license, citizenid, vehicle, spawnid, plateID);
     } catch (error) {
@@ -130,7 +130,6 @@ async function processOrder(name: string, license: string, citizenid: string, ve
     
     try {
         const result = await dbPool2.execute('INSERT INTO processed_orders (name, license, citizenid, vehicle, spawnid, plate, date, time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',[name, license, citizenid, vehicle, spawnid, plateID, currentDate, currentTime]);
-        console.log('insertion result: ', result)
     } catch (error) {
         console.error('Error executing SQL query:', error);
     }
@@ -206,10 +205,6 @@ module.exports = {
                 return;
             }
 
-            if (foundcid !== idValue) {
-                interaction.reply(`The ID ${idValue} is not associated with any citizen.`);
-                return;
-            }
 
             generatedPlates = await generatePlateNumbers(interaction, license_plate);
 

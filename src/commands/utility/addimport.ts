@@ -41,11 +41,9 @@ async function addImportToVehicleLua(import_id: string, import_name: string, imp
 
     let exportVehicleData = formatString(impData, import_id, import_name, import_make,import_cat,import_cat);
     let vehiclesLua = `${process.env.vehicleLuaPath}vehicles.lua`;
-    console.log('This is the path to vehicles.lua: ', vehiclesLua)
 
     try {
         let fileContent = fs.readFileSync(vehiclesLua, 'utf-8').toString();
-        console.log('This is the file content', fileContent)
 
         const importIndex = fileContent.indexOf('--Imports');
 
