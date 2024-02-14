@@ -233,7 +233,7 @@ module.exports = {
             const confirmationEmbed = new EmbedBuilder() 
                 .setColor(0x0099FF)
                 .setTitle('Confirm Import Order')
-                .setDescription(`Do you want to confirm the import order for ${foundName} with license plate ${generatedPlates}?`)
+                .setDescription(`Do you want to confirm the import order for ${foundName} (cid: ${foundcid}) with license plate ${generatedPlates}?`)
                 .addFields(
                     // { name: 'Discord User: ', value: discordUser.tag || 'N/A' },
                     { name: 'Citizen Name: ', value: foundName || 'N/A' },
