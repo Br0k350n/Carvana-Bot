@@ -98,9 +98,9 @@ module.exports = {
         const import_id = interaction.options.getString('import_id').toLowerCase();
         const import_make = interaction.options.getString('import_make').toLowerCase();
         const import_cat = interaction.options.getString('import_cat').toLowerCase();
-        const isAdmin = interaction.member.roles.cache.some(role => role.name === 'admin');
-        const isTester = interaction.member.roles.cache.some(role => role.name === 'tester');
-        if (!isAdmin && !isTester) {
+        const allowedRoles = JSON.parse(process.env.ALLOWED_ROLES);
+        const hasAllowedRole = interaction.member.roles.cache.some(role => allowedRoles.includes(role.name.toLowerCase()));
+        if (!hasAllowedRole) {
             return interaction.reply('You do not have the necessary role to use this command.');
         }
 

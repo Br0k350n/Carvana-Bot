@@ -163,10 +163,10 @@ module.exports = {
         // const discordUser = await checkDiscordUser(discordId);
         const idValue = interaction.options.getInteger('cid');
         const importId = interaction.options.getString('import_id').toLowerCase();
-        const isAdmin = interaction.member.roles.cache.some(role => role.name === 'admin');
-        const isTester = interaction.member.roles.cache.some(role => role.name === 'tester');
+        const allowedRoles = JSON.parse(process.env.ALLOWED_ROLES);
         const license_plate = interaction.options.getString('cp');
-        if (!isAdmin && !isTester) {
+        const hasAllowedRole = interaction.member.roles.cache.some(role => allowedRoles.includes(role.name.toLowerCase()));
+        if (!hasAllowedRole) {
             return interaction.reply('You do not have the necessary role to use this command.');
         }
 
