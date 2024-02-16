@@ -139,7 +139,7 @@ async function processOrder(name: string, license: string, citizenid: string, ve
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('giveimport')
+        .setName('vehiclegive')
         .setDescription('Give a player an imported vehicle.')
         // .addStringOption(option =>
         //     option.setName('discord_id')

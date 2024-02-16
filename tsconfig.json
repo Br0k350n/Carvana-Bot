@@ -10,8 +10,7 @@
     },
     "include": [
       "src/index.ts",
-      "dist/commands/**/*.ts"
-, "src/commands/utility/addimport.ts", "src/commands/utility/giveimport.ts", "src/commands/utility/logban.ts"    ],
+      "src/commands/**/*.ts"],
     "exclude": [
       "node_modules"
     ]

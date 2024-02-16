@@ -73,7 +73,7 @@ async function addImportToDatabase(import_id: string, import_name: string) {
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('addimport')
+        .setName('vehicleadd')
         .setDescription('Add a new import to the database.')
         .addStringOption(option =>
             option.setName('import_id')
