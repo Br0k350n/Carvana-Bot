@@ -102,13 +102,13 @@ Before running the bot, ensure you have the following:
 ### Congratulations 
   #### You have successfully installed the Carvana Discord Bot! The commands for this bot will automatically be available to anyone with the role of "admin" or "tester", but you can change this in your .env file.
 ## Commands
-  - **```/giveimport(cid, import_id, cp?)```**
+  - **```/vehicleadd(cid, import_id, cp?)```**
     - ```cid```: The ID given to players as they fly in to the city, commonly known in FiveM as your "lucky number".
     - ```import_id```: The spawnid of the vehicle being given.
     - ```cp(custom plate)```: an optional parameter for making a custom license plate.
     - This will not only be added to the database in "players_vehicles", but will also be tracked in your googlesheet. On top of this, the processed orders will go into the "processed_orders" table of the "imported_vehicles" database.
 
-- **```/addimport(import_id, import_name, import_make, import_cat)```**
+- **```/vehiclegive(import_id, import_name, import_make, import_cat)```**
   - ```import_id```: The spawnid you set for the new vehicle.
   - ```import_name```: The name you set for the new vehicle.
   - ```import_make```: The "brand" of your new vehicle.
