@@ -1,8 +1,11 @@
 # Carvana Discord Bot
+## Shop Integration
+
+### This branch is dependent on the Simplicoin react app and its database. Without the react app database, the shop features will not work.
 
 ## Overview
 
-#### The Carvana Discord bot is designed to facilitate the management of imported vehicles in your FiveM Discord server. It integrates with Google Sheets for data storage and retrieval, as well as MySQL for database operations related to imported vehicles.
+#### The Carvana Discord bot is designed to facilitate the management of imported vehicles in your FiveM Discord server. It integrates with Google Sheets for data storage and retrieval, as well as MySQL for database operations related to imported vehicles. This branch also implements a store where you can use Simplicoins to purchase Import Vehicle Tokens and a V.I.P role. These Simplicoins are purchased in the Simplicoin react app.
 
 ## Credits
 - Eugene & Edward Conroy with E<sup>2</sup> Development (Maldo & Br0k350n)
@@ -95,9 +98,9 @@ Before running the bot, ensure you have the following:
    ```
 9. (**optional**) change the roles allowed to use the /giveimport and /addimport commands.
  
-   go to your ```.env``` file, and in ```ALLOWED_ROLES``` change what roles you'd like to have access to these commands.
+   go to your ```.env``` file, and in ```ALLOWED_ROLES``` change what roles you'd like to have access to these commands. You may also change the value of the ```VIP_ROLE```.
 
-   Make sure that the roles you add in the ```.env``` file are all in **lowercase**.
+   Make sure that the roles you add and/or edit in the ```.env``` file are all in **lowercase**.
 
 ### Congratulations 
   #### You have successfully installed the Carvana Discord Bot! The commands for this bot will automatically be available to anyone with the role of "admin" or "tester", but you can change this in your .env file.
@@ -114,6 +117,14 @@ Before running the bot, ensure you have the following:
   - ```import_make```: The "brand" of your new vehicle.
   - ```import_cat```: The category of your new vehicle.
   - This new vehicle will be added into the "vehicles.lua" as well as the ```vehicles``` table in the ```imported_vehicles``` database.
+
+- **```/checkbalance```**
+  - This will show you the amount of Simplicoins on your Discord account. It utilizes the ``discord id`` you inserted in the account creation process and compares it to your discord id for verification. **[IT IS VITAL THAT YOU REGISTER YOUR ACCOUNT WITH THE CORRECT DISCORD ID]**
+
+- **```/shop [vip] [vehicle-token]```**
+  - ```vip```: If you purchase vip, you get a new role.
+  - ```vehicle-token```: Vehicle tokens are used to buy import vehicle tokens.
+  - Vip can only be purchased once per user, vehicle tokens are saved in the Simplicoin database.
 
 ## Thank You For Reading!
 [Back to the top](https://github.com/Br0k350n/Carvana-Bot/edit/master/README.md#carvana-discord-bot)
