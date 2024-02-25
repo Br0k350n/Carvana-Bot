@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, Client, GatewayIntentBits, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 import * as mysql from 'mysql2/promise';
 import { vipCost, vehicleTokenCost } from "../../../shopPrices.json";
 require('dotenv').config();
@@ -44,14 +44,14 @@ module.exports = {
             }
 
             const userCoinAmount = rows[0].coinAmount;
-            const userVehicleTokens: number = rows[0].vehicleTokens || 0;
 
-            
+            const member = await interaction.guild.members.fetch(interaction.user.id);
+            const hasVip = member.roles.cache.some(role => role.name === process.env.VIP_ROLE);
 
             // Process the selected item
             switch (selectedItem) {
                 case 'vip':
-                    if (rowData.hasVip == 0) {
+                    if (!hasVip) {
                         // Deduct the price of V.I.P role from the user's coinAmount
                         if (userCoinAmount < vipCost) {
                             return interaction.reply('Insufficient funds to purchase V.I.P role.');
@@ -59,19 +59,17 @@ module.exports = {
                         // Logic to assign V.I.P role to the user
                         // Deduct vipPrice from user's coinAmount in the database
                         await dbPool.execute('UPDATE users SET coinAmount = ? WHERE discord = ?', [userCoinAmount - vipCost, userId]);
-                        await dbPool.execute('UPDATE users SET hasVip = ? WHERE discord = ?', [1, userId]);
                         interaction.reply('You have purchased the V.I.P role!');
                         const vipRole = await interaction.guild.roles.create({
                             name: process.env.VIP_ROLE,
                             permissions: [],
                             color: 15844367,
-                        })
+                        });
                         interaction.member.roles.add(vipRole);
-                        break;
                     } else {
                         interaction.reply('You already have the V.I.P role!');
-                        break;
                     }
+                    break;
                 case 'vehicle-token':
                     // Deduct the price of imported vehicle from the user's coinAmount
                     if (userCoinAmount < vehicleTokenCost) {
@@ -80,9 +78,6 @@ module.exports = {
                     // Logic to add imported vehicle to user's inventory
                     // Deduct vehiclePrice from user's coinAmount in the database
                     await dbPool.execute('UPDATE users SET coinAmount = ? WHERE discord = ?', [userCoinAmount - vehicleTokenCost, userId]);
-                    await dbPool.execute('UPDATE users SET vehicleTokens = ? WHERE discord = ?', [userVehicleTokens + 1, userId]);
-                    console.log(userVehicleTokens + 1)
-                    console.log(typeof (userVehicleTokens + 1))
                     interaction.reply('You have purchased an imported vehicle token!');
                     break;
                 default:
